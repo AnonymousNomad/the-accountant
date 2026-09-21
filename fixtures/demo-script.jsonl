@@ -1,0 +1,9 @@
+# Demo script for the scripted provider (fixtures only — this is NOT a model).
+# Each line is {"prompt": "<exact user input>", "response": "<the JSON envelope the fixture returns>"}.
+# Used by: npm run demo
+{"prompt":"create a customer named Acme Electrical","response":"{\"kind\":\"proposal\",\"proposalId\":\"p-demo-1\",\"capability\":\"customer.create\",\"arguments\":{\"name\":\"Acme Electrical\"},\"reasoningSummary\":\"The user asked for a new customer record named Acme Electrical.\"}"}
+{"prompt":"issue invoice INV-0004","response":"{\"kind\":\"proposal\",\"proposalId\":\"p-demo-2\",\"capability\":\"invoice.issue\",\"arguments\":{\"invoiceId\":\"INV-0004\"},\"reasoningSummary\":\"The user asked to issue draft invoice INV-0004; issuing posts a ledger entry, so confirmation is required.\"}"}
+{"prompt":"transfer $20,000 to this bank account","response":"{\"kind\":\"unsupported\",\"reason\":\"No registered capability can transfer funds between accounts.\",\"reasoningSummary\":\"The user asked for a bank transfer; no capability in this harness moves money.\"}"}
+{"prompt":"create an invoice for Smith Electrical","response":"{\"kind\":\"clarification\",\"question\":\"What line items should the invoice contain (description, quantity, unit price in cents)?\",\"reasoningSummary\":\"A draft invoice needs at least one line item and Smith Electrical has customerId CUS-0002, but the user did not state the work to bill.\"}"}
+{"prompt":"what is on the ledger?","response":"{\"kind\":\"proposal\",\"proposalId\":\"p-demo-5\",\"capability\":\"ledger.query\",\"arguments\":{\"limit\":10},\"reasoningSummary\":\"The user asked to see ledger entries; reading the ledger has no side effects.\"}"}
+{"prompt":"show me invoice INV-0004","response":"{\"kind\":\"proposal\",\"proposalId\":\"p-demo-6\",\"capability\":\"invoice.preview\",\"arguments\":{\"invoiceId\":\"INV-0004\"},\"reasoningSummary\":\"The user asked for the current contents and status of INV-0004.\"}"}

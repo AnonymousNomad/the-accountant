@@ -1,0 +1,13 @@
+# Runtime output: evidence journals are local artefacts, never committed.
+var/
+
+# Benchmark results are local run artefacts; the fixtures are committed.
+benchmarks/results/
+
+# Local adapter headers. Must never be committed (see docs/matrices/DEPENDENCY_MATRIX.md).
+config/http-headers.local.json
+
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

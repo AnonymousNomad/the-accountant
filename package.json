@@ -1,0 +1,21 @@
+{
+  "name": "sovereign-action-harness",
+  "version": "0.1.0",
+  "description": "Local-first AI execution harness: the model proposes, the harness decides, executes, and verifies.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "start": "node src/cli.mjs",
+    "demo": "node src/cli.mjs --provider scripted --script fixtures/demo-script.jsonl",
+    "test": "node --test",
+    "lint": "node scripts/lint.mjs",
+    "typecheck": "node scripts/typecheck.mjs",
+    "verify": "node scripts/verify.mjs",
+    "bench": "node benchmarks/run-benchmark.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
