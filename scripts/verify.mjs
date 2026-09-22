@@ -19,6 +19,8 @@ const skipTypecheck = argv.includes('--skip-typecheck');
 
 const steps = [
   { name: 'lint', command: process.execPath, args: ['scripts/lint.mjs'] },
+  { name: 'route-classification', command: process.execPath, args: ['scripts/verify-route-classification.mjs'] },
+  { name: 'simulation', command: process.execPath, args: ['scripts/verify-simulation.mjs'] },
   ...(skipTypecheck ? [] : [{ name: 'typecheck', command: process.execPath, args: ['scripts/typecheck.mjs'] }]),
   { name: 'tests', command: process.execPath, args: ['--test'] },
   ...(skipBench ? [] : [{ name: 'benchmark', command: process.execPath, args: ['benchmarks/run-benchmark.mjs', '--arm', 'bounded'] }])

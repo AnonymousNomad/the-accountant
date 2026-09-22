@@ -1,0 +1,47 @@
+{
+  "identity": {
+    "actorId": "operator-local",
+    "workspaceId": "live-230m"
+  },
+  "provider": {
+    "kind": "llama-server",
+    "baseUrl": "http://127.0.0.1:8095",
+    "model": "LFM2.5-230M-Q8_0.gguf",
+    "executable": "E:\\llama-cpp\\llama-server.exe",
+    "modelPath": "E:\\aide-sovereign-workbench\\models\\LFM2.5-230M-Q8_0.gguf",
+    "manageServer": true,
+    "port": 8095,
+    "numCtx": 4096,
+    "threads": 4,
+    "startupTimeoutMs": 120000,
+    "inferenceTimeoutMs": 120000,
+    "maxTokens": 512,
+    "temperature": 0.1,
+    "topK": 50,
+    "repeatPenalty": 1.05,
+    "structuredMode": "json_schema",
+    "allowNonLocalProvider": false
+  },
+  "policy": {
+    "riskAllowlist": ["READ", "DRAFT", "MUTATION", "FINANCIAL"],
+    "requireConfirmationFor": ["FINANCIAL"],
+    "grantedPermissions": ["accounting.read", "accounting.write", "accounting.financial"]
+  },
+  "confirmation": { "ttlSeconds": 120 },
+  "authority": { "permitTtlSeconds": 60 },
+  "exposure": {
+    "maxCapabilities": 12,
+    "domains": ["accounting.customers", "accounting.invoices", "accounting.ledger"]
+  },
+  "adapters": {
+    "mock": { "enabled": true },
+    "http": {
+      "enabled": false,
+      "baseUrl": "",
+      "bindings": {},
+      "headersFile": null,
+      "timeoutMs": 10000
+    }
+  },
+  "evidence": { "dir": "var/evidence-live" }
+}

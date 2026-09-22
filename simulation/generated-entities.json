@@ -1,0 +1,3899 @@
+{
+  "$schemaNote": "SCALE-FAITHFUL / BEHAVIOR-SYNTHETIC / NOT A REPLICA of any external system. No real accounting, tax or payroll rules exist here.",
+  "generatedBy": "simulation/generate-topology.mjs",
+  "counts": {
+    "total": 88,
+    "byGroup": {
+      "Identity/Admin": 10,
+      "Customers/Suppliers": 8,
+      "Quotes/Invoices": 12,
+      "Ledger/Payments": 12,
+      "Payroll/Timesheets/Rosters": 12,
+      "Inventory/POS/Barcode": 12,
+      "Tax/Jurisdiction": 8,
+      "Reporting/Config/Audit": 8,
+      "Gift Cards/Loyalty": 6
+    }
+  },
+  "entities": [
+    {
+      "name": "user",
+      "domain": "platform.identity",
+      "keyField": "user_id",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "integer",
+          "note": "Primary key of the user row."
+        },
+        {
+          "name": "display_name",
+          "type": "string",
+          "note": "Name shown in the workspace for this user."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "note": "Sign-in address for this user."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the account may sign in."
+        },
+        {
+          "name": "last_seen_at",
+          "type": "string",
+          "note": "Timestamp of the most recent successful sign-in."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "role",
+      "domain": "platform.identity",
+      "keyField": "role_id",
+      "fields": [
+        {
+          "name": "role_id",
+          "type": "integer",
+          "note": "Primary key of the role row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Human label of the role."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "note": "What the role is intended to allow."
+        },
+        {
+          "name": "system",
+          "type": "boolean",
+          "note": "Whether the role is built in and cannot be deleted."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "permission",
+      "domain": "platform.identity",
+      "keyField": "permission_id",
+      "fields": [
+        {
+          "name": "permission_id",
+          "type": "integer",
+          "note": "Primary key of the permission row."
+        },
+        {
+          "name": "permission_ref",
+          "type": "string",
+          "note": "Stable reference of the permission."
+        },
+        {
+          "name": "area",
+          "type": "string",
+          "note": "Area of the workspace the permission covers."
+        },
+        {
+          "name": "risk_floor",
+          "type": "string",
+          "note": "Lowest risk class this permission may execute."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "role_permission",
+      "domain": "platform.identity",
+      "keyField": "role_permission_id",
+      "fields": [
+        {
+          "name": "role_permission_id",
+          "type": "integer",
+          "note": "Primary key of the role_permission row."
+        },
+        {
+          "name": "role_id",
+          "type": "integer",
+          "note": "Role the permission is granted to."
+        },
+        {
+          "name": "permission_id",
+          "type": "integer",
+          "note": "Permission that is granted."
+        },
+        {
+          "name": "granted_at",
+          "type": "string",
+          "note": "Timestamp the grant was created."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "user_session",
+      "domain": "platform.identity",
+      "keyField": "user_session_id",
+      "fields": [
+        {
+          "name": "user_session_id",
+          "type": "integer",
+          "note": "Primary key of the user_session row."
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "note": "User the session belongs to."
+        },
+        {
+          "name": "device_label",
+          "type": "string",
+          "note": "Label of the device that holds the session."
+        },
+        {
+          "name": "started_at",
+          "type": "string",
+          "note": "Timestamp the session started."
+        },
+        {
+          "name": "revoked_at",
+          "type": "string",
+          "note": "Timestamp the session stopped working, or null."
+        },
+        {
+          "name": "expires_at",
+          "type": "string",
+          "note": "Timestamp the session stops being valid."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "api_key",
+      "domain": "platform.identity",
+      "keyField": "api_key_id",
+      "fields": [
+        {
+          "name": "api_key_id",
+          "type": "integer",
+          "note": "Primary key of the api_key row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label identifying what the key is for."
+        },
+        {
+          "name": "key_prefix",
+          "type": "string",
+          "note": "Non-secret prefix of the key, shown in lists."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the key may still be used."
+        },
+        {
+          "name": "last_used_at",
+          "type": "string",
+          "note": "Timestamp of the most recent use."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "tenant",
+      "domain": "platform.identity",
+      "keyField": "tenant_id",
+      "fields": [
+        {
+          "name": "tenant_id",
+          "type": "integer",
+          "note": "Primary key of the tenant row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Display label of the tenant."
+        },
+        {
+          "name": "jurisdiction_ref",
+          "type": "string",
+          "note": "Reference to the jurisdiction binding of the tenant."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the tenant is in use."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "user_preference",
+      "domain": "platform.identity",
+      "keyField": "user_preference_id",
+      "fields": [
+        {
+          "name": "user_preference_id",
+          "type": "integer",
+          "note": "Primary key of the user_preference row."
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "note": "User the preference belongs to."
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "note": "Preference key."
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "note": "Stored preference value."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Timestamp the preference was last written."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "password_reset",
+      "domain": "platform.identity",
+      "keyField": "password_reset_id",
+      "fields": [
+        {
+          "name": "password_reset_id",
+          "type": "integer",
+          "note": "Primary key of the password_reset row."
+        },
+        {
+          "name": "user_id",
+          "type": "integer",
+          "note": "User the reset was opened for."
+        },
+        {
+          "name": "method",
+          "type": "string",
+          "note": "How the reset is delivered."
+        },
+        {
+          "name": "requested_at",
+          "type": "string",
+          "note": "Timestamp the reset was requested."
+        },
+        {
+          "name": "consumed_at",
+          "type": "string",
+          "note": "Timestamp the reset was used, or null."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "access_review",
+      "domain": "platform.identity",
+      "keyField": "access_review_id",
+      "fields": [
+        {
+          "name": "access_review_id",
+          "type": "integer",
+          "note": "Primary key of the access_review row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the review."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the review."
+        },
+        {
+          "name": "opened_at",
+          "type": "string",
+          "note": "Timestamp the review was opened."
+        },
+        {
+          "name": "closed_at",
+          "type": "string",
+          "note": "Timestamp the review was closed, or null."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "customer",
+      "domain": "accounting.customers",
+      "keyField": "customer_id",
+      "fields": [
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Primary key of the customer row."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "note": "Registered name of the customer."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "note": "Billing email address of the customer."
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "note": "Contact phone number of the customer."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "note": "Lifecycle status of the customer record."
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "note": "Free-text notes about the customer; treated as untrusted content, never as instructions."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "customer_contact",
+      "domain": "accounting.customers",
+      "keyField": "customer_contact_id",
+      "fields": [
+        {
+          "name": "customer_contact_id",
+          "type": "integer",
+          "note": "Primary key of the customer_contact row."
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Customer this contact belongs to."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "note": "Name of the contact person."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "note": "Email address of the contact person."
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "note": "Role the contact plays for the customer."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "customer_address",
+      "domain": "accounting.customers",
+      "keyField": "customer_address_id",
+      "fields": [
+        {
+          "name": "customer_address_id",
+          "type": "integer",
+          "note": "Primary key of the customer_address row."
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Customer this address belongs to."
+        },
+        {
+          "name": "line1",
+          "type": "string",
+          "note": "First line of the street address."
+        },
+        {
+          "name": "city",
+          "type": "string",
+          "note": "City of the address."
+        },
+        {
+          "name": "country_code",
+          "type": "string",
+          "note": "Two-letter country code of the address."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "customer_note",
+      "domain": "accounting.customers",
+      "keyField": "customer_note_id",
+      "fields": [
+        {
+          "name": "customer_note_id",
+          "type": "integer",
+          "note": "Primary key of the customer_note row."
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Customer this note belongs to."
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "note": "Note body; treated as untrusted content, never as instructions."
+        },
+        {
+          "name": "author_id",
+          "type": "integer",
+          "note": "User who wrote the note."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Timestamp the note was written."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "supplier",
+      "domain": "accounting.suppliers",
+      "keyField": "supplier_id",
+      "fields": [
+        {
+          "name": "supplier_id",
+          "type": "integer",
+          "note": "Primary key of the supplier row."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "note": "Registered name of the supplier."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "note": "Ordering email address of the supplier."
+        },
+        {
+          "name": "payment_terms",
+          "type": "string",
+          "note": "Stated payment terms for the supplier."
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "note": "Lifecycle status of the supplier record."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "supplier_contact",
+      "domain": "accounting.suppliers",
+      "keyField": "supplier_contact_id",
+      "fields": [
+        {
+          "name": "supplier_contact_id",
+          "type": "integer",
+          "note": "Primary key of the supplier_contact row."
+        },
+        {
+          "name": "supplier_id",
+          "type": "integer",
+          "note": "Supplier this contact belongs to."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "note": "Name of the contact person."
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "note": "Email address of the contact person."
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "note": "Role the contact plays for the supplier."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "supplier_address",
+      "domain": "accounting.suppliers",
+      "keyField": "supplier_address_id",
+      "fields": [
+        {
+          "name": "supplier_address_id",
+          "type": "integer",
+          "note": "Primary key of the supplier_address row."
+        },
+        {
+          "name": "supplier_id",
+          "type": "integer",
+          "note": "Supplier this address belongs to."
+        },
+        {
+          "name": "line1",
+          "type": "string",
+          "note": "First line of the street address."
+        },
+        {
+          "name": "city",
+          "type": "string",
+          "note": "City of the address."
+        },
+        {
+          "name": "country_code",
+          "type": "string",
+          "note": "Two-letter country code of the address."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "supplier_bank_account",
+      "domain": "accounting.suppliers",
+      "keyField": "supplier_bank_account_id",
+      "fields": [
+        {
+          "name": "supplier_bank_account_id",
+          "type": "integer",
+          "note": "Primary key of the supplier_bank_account row."
+        },
+        {
+          "name": "supplier_id",
+          "type": "integer",
+          "note": "Supplier this account belongs to."
+        },
+        {
+          "name": "account_ref",
+          "type": "string",
+          "note": "Masked reference of the account."
+        },
+        {
+          "name": "bank_name",
+          "type": "string",
+          "note": "Name of the bank holding the account."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the account may receive payments."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "quote",
+      "domain": "accounting.quotes",
+      "keyField": "quote_id",
+      "fields": [
+        {
+          "name": "quote_id",
+          "type": "integer",
+          "note": "Primary key of the quote row."
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Customer the quote is addressed to."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "note": "Short title of the quote."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the quote."
+        },
+        {
+          "name": "total_cents",
+          "type": "integer",
+          "note": "Stored total of the quote in minor currency units."
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "note": "Note shown on the quote; treated as untrusted content, never as instructions."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "quote_line",
+      "domain": "accounting.quotes",
+      "keyField": "quote_line_id",
+      "fields": [
+        {
+          "name": "quote_line_id",
+          "type": "integer",
+          "note": "Primary key of the quote_line row."
+        },
+        {
+          "name": "quote_id",
+          "type": "integer",
+          "note": "Quote this line belongs to."
+        },
+        {
+          "name": "line_number",
+          "type": "integer",
+          "note": "Display position of the line."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "note": "Description of the quoted work."
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "note": "Quoted quantity."
+        },
+        {
+          "name": "unit_price_cents",
+          "type": "integer",
+          "note": "Unit price in minor currency units."
+        },
+        {
+          "name": "line_total_cents",
+          "type": "integer",
+          "note": "Stored line total in minor currency units."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "quote_revision",
+      "domain": "accounting.quotes",
+      "keyField": "quote_revision_id",
+      "fields": [
+        {
+          "name": "quote_revision_id",
+          "type": "integer",
+          "note": "Primary key of the quote_revision row."
+        },
+        {
+          "name": "quote_id",
+          "type": "integer",
+          "note": "Quote this revision belongs to."
+        },
+        {
+          "name": "revision_number",
+          "type": "integer",
+          "note": "Monotonic revision number of the quote."
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "note": "Reason the revision was created."
+        },
+        {
+          "name": "snapshot_ref",
+          "type": "string",
+          "note": "Reference to the immutable snapshot of the revision."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "invoice",
+      "domain": "accounting.invoices",
+      "keyField": "invoice_id",
+      "fields": [
+        {
+          "name": "invoice_id",
+          "type": "integer",
+          "note": "Primary key of the invoice row."
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Customer the invoice is addressed to."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "note": "Short title of the invoice."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the invoice."
+        },
+        {
+          "name": "total_cents",
+          "type": "integer",
+          "note": "Stored total of the invoice in minor currency units."
+        },
+        {
+          "name": "internal_note",
+          "type": "string",
+          "note": "Internal note on the invoice; treated as untrusted content, never as instructions."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "invoice_line",
+      "domain": "accounting.invoices",
+      "keyField": "invoice_line_id",
+      "fields": [
+        {
+          "name": "invoice_line_id",
+          "type": "integer",
+          "note": "Primary key of the invoice_line row."
+        },
+        {
+          "name": "invoice_id",
+          "type": "integer",
+          "note": "Invoice this line belongs to."
+        },
+        {
+          "name": "line_number",
+          "type": "integer",
+          "note": "Display position of the line."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "note": "Description of the billed work."
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "note": "Billed quantity."
+        },
+        {
+          "name": "unit_price_cents",
+          "type": "integer",
+          "note": "Unit price in minor currency units."
+        },
+        {
+          "name": "line_total_cents",
+          "type": "integer",
+          "note": "Stored line total in minor currency units."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "invoice_attachment",
+      "domain": "accounting.invoices",
+      "keyField": "invoice_attachment_id",
+      "fields": [
+        {
+          "name": "invoice_attachment_id",
+          "type": "integer",
+          "note": "Primary key of the invoice_attachment row."
+        },
+        {
+          "name": "invoice_id",
+          "type": "integer",
+          "note": "Invoice this attachment belongs to."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label shown for the attachment."
+        },
+        {
+          "name": "file_ref",
+          "type": "string",
+          "note": "Workspace-relative reference to the stored file."
+        },
+        {
+          "name": "checksum",
+          "type": "string",
+          "note": "Checksum of the stored file."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "invoice_reminder",
+      "domain": "accounting.invoices",
+      "keyField": "invoice_reminder_id",
+      "fields": [
+        {
+          "name": "invoice_reminder_id",
+          "type": "integer",
+          "note": "Primary key of the invoice_reminder row."
+        },
+        {
+          "name": "invoice_id",
+          "type": "integer",
+          "note": "Invoice this reminder belongs to."
+        },
+        {
+          "name": "due_on",
+          "type": "string",
+          "note": "Date the reminder is due to be acted on."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the reminder."
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "note": "Note stored with the reminder; treated as untrusted content."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "credit_note",
+      "domain": "accounting.invoices",
+      "keyField": "credit_note_id",
+      "fields": [
+        {
+          "name": "credit_note_id",
+          "type": "integer",
+          "note": "Primary key of the credit_note row."
+        },
+        {
+          "name": "invoice_id",
+          "type": "integer",
+          "note": "Invoice the credit note was raised against."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Credited amount in minor currency units."
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "note": "Reason recorded for the credit note."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the credit note."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "credit_note_line",
+      "domain": "accounting.invoices",
+      "keyField": "credit_note_line_id",
+      "fields": [
+        {
+          "name": "credit_note_line_id",
+          "type": "integer",
+          "note": "Primary key of the credit_note_line row."
+        },
+        {
+          "name": "credit_note_id",
+          "type": "integer",
+          "note": "Credit note this line belongs to."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "note": "Description of the credited item."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Credited amount for this line."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "invoice_delivery",
+      "domain": "accounting.invoices",
+      "keyField": "invoice_delivery_id",
+      "fields": [
+        {
+          "name": "invoice_delivery_id",
+          "type": "integer",
+          "note": "Primary key of the invoice_delivery row."
+        },
+        {
+          "name": "invoice_id",
+          "type": "integer",
+          "note": "Invoice that was delivered."
+        },
+        {
+          "name": "channel",
+          "type": "string",
+          "note": "Channel the delivery used."
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "note": "Address the delivery was sent to."
+        },
+        {
+          "name": "outcome",
+          "type": "string",
+          "note": "Outcome recorded for the delivery attempt."
+        },
+        {
+          "name": "attempted_at",
+          "type": "string",
+          "note": "Timestamp of the delivery attempt."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "recurring_invoice_schedule",
+      "domain": "accounting.invoices",
+      "keyField": "recurring_invoice_schedule_id",
+      "fields": [
+        {
+          "name": "recurring_invoice_schedule_id",
+          "type": "integer",
+          "note": "Primary key of the recurring_invoice_schedule row."
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Customer the recurring invoices are raised for."
+        },
+        {
+          "name": "cadence",
+          "type": "string",
+          "note": "Stated cadence of the schedule."
+        },
+        {
+          "name": "next_run_on",
+          "type": "string",
+          "note": "Date the next invoice is due to be raised."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the schedule is still running."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "invoice_number_sequence",
+      "domain": "accounting.invoices",
+      "keyField": "invoice_number_sequence_id",
+      "fields": [
+        {
+          "name": "invoice_number_sequence_id",
+          "type": "integer",
+          "note": "Primary key of the invoice_number_sequence row."
+        },
+        {
+          "name": "prefix",
+          "type": "string",
+          "note": "Prefix used when formatting the next number."
+        },
+        {
+          "name": "next_value",
+          "type": "integer",
+          "note": "Next value that will be issued."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Timestamp the sequence was last advanced."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "ledger_account",
+      "domain": "accounting.ledger",
+      "keyField": "ledger_account_id",
+      "fields": [
+        {
+          "name": "ledger_account_id",
+          "type": "integer",
+          "note": "Primary key of the ledger_account row."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "note": "Name of the ledger account."
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "note": "Account kind used for grouping."
+        },
+        {
+          "name": "archived",
+          "type": "boolean",
+          "note": "Whether the account is hidden from active lists."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "ledger_entry",
+      "domain": "accounting.ledger",
+      "keyField": "ledger_entry_id",
+      "fields": [
+        {
+          "name": "ledger_entry_id",
+          "type": "integer",
+          "note": "Primary key of the ledger_entry row."
+        },
+        {
+          "name": "account_id",
+          "type": "integer",
+          "note": "Account the entry was posted to."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Signed amount in minor currency units."
+        },
+        {
+          "name": "posted_on",
+          "type": "string",
+          "note": "Date the entry was posted."
+        },
+        {
+          "name": "memo",
+          "type": "string",
+          "note": "Memo stored with the entry; treated as untrusted content."
+        },
+        {
+          "name": "source_ref",
+          "type": "string",
+          "note": "Reference to the document that produced the entry."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "journal",
+      "domain": "accounting.ledger",
+      "keyField": "journal_id",
+      "fields": [
+        {
+          "name": "journal_id",
+          "type": "integer",
+          "note": "Primary key of the journal row."
+        },
+        {
+          "name": "memo",
+          "type": "string",
+          "note": "Memo stored with the journal; treated as untrusted content."
+        },
+        {
+          "name": "entry_date",
+          "type": "string",
+          "note": "Date the journal applies to."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the journal."
+        },
+        {
+          "name": "posted_at",
+          "type": "string",
+          "note": "Timestamp the journal was posted, or null."
+        },
+        {
+          "name": "author_id",
+          "type": "integer",
+          "note": "User who proposed the journal."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "journal_line",
+      "domain": "accounting.ledger",
+      "keyField": "journal_line_id",
+      "fields": [
+        {
+          "name": "journal_line_id",
+          "type": "integer",
+          "note": "Primary key of the journal_line row."
+        },
+        {
+          "name": "journal_id",
+          "type": "integer",
+          "note": "Journal this line belongs to."
+        },
+        {
+          "name": "account_id",
+          "type": "integer",
+          "note": "Account this line affects."
+        },
+        {
+          "name": "debit_cents",
+          "type": "integer",
+          "note": "Debit amount in minor currency units."
+        },
+        {
+          "name": "credit_cents",
+          "type": "integer",
+          "note": "Credit amount in minor currency units."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "journal_template",
+      "domain": "accounting.ledger",
+      "keyField": "journal_template_id",
+      "fields": [
+        {
+          "name": "journal_template_id",
+          "type": "integer",
+          "note": "Primary key of the journal_template row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the template."
+        },
+        {
+          "name": "line_count",
+          "type": "integer",
+          "note": "Number of lines the template carries."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the template may still be applied."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "payment",
+      "domain": "accounting.payments",
+      "keyField": "payment_id",
+      "fields": [
+        {
+          "name": "payment_id",
+          "type": "integer",
+          "note": "Primary key of the payment row."
+        },
+        {
+          "name": "payer_id",
+          "type": "integer",
+          "note": "Party the payment was received from."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Received amount in minor currency units."
+        },
+        {
+          "name": "unapplied_cents",
+          "type": "integer",
+          "note": "Amount not yet applied to any invoice."
+        },
+        {
+          "name": "received_on",
+          "type": "string",
+          "note": "Date the money was received."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the payment."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "payment_allocation",
+      "domain": "accounting.payments",
+      "keyField": "payment_allocation_id",
+      "fields": [
+        {
+          "name": "payment_allocation_id",
+          "type": "integer",
+          "note": "Primary key of the payment_allocation row."
+        },
+        {
+          "name": "payment_id",
+          "type": "integer",
+          "note": "Payment this allocation belongs to."
+        },
+        {
+          "name": "invoice_id",
+          "type": "integer",
+          "note": "Invoice the allocated amount was applied to."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Allocated amount in minor currency units."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Timestamp the allocation was created."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "payment_method",
+      "domain": "accounting.payments",
+      "keyField": "payment_method_id",
+      "fields": [
+        {
+          "name": "payment_method_id",
+          "type": "integer",
+          "note": "Primary key of the payment_method row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label shown for the method."
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "note": "Kind of method, such as cash or transfer."
+        },
+        {
+          "name": "archived",
+          "type": "boolean",
+          "note": "Whether the method is hidden from active lists."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "payment_batch",
+      "domain": "accounting.payments",
+      "keyField": "payment_batch_id",
+      "fields": [
+        {
+          "name": "payment_batch_id",
+          "type": "integer",
+          "note": "Primary key of the payment_batch row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the batch."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the batch."
+        },
+        {
+          "name": "received_on",
+          "type": "string",
+          "note": "Date the batch was received."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "payment_batch_item",
+      "domain": "accounting.payments",
+      "keyField": "payment_batch_item_id",
+      "fields": [
+        {
+          "name": "payment_batch_item_id",
+          "type": "integer",
+          "note": "Primary key of the payment_batch_item row."
+        },
+        {
+          "name": "batch_id",
+          "type": "integer",
+          "note": "Batch this row belongs to."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Amount recorded for this row."
+        },
+        {
+          "name": "payer_ref",
+          "type": "string",
+          "note": "Payer reference from the source file."
+        },
+        {
+          "name": "accepted",
+          "type": "boolean",
+          "note": "Whether the row passed validation."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "bank_deposit",
+      "domain": "accounting.payments",
+      "keyField": "bank_deposit_id",
+      "fields": [
+        {
+          "name": "bank_deposit_id",
+          "type": "integer",
+          "note": "Primary key of the bank_deposit row."
+        },
+        {
+          "name": "received_on",
+          "type": "string",
+          "note": "Date the deposit was received."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Deposited amount in minor currency units."
+        },
+        {
+          "name": "account_ref",
+          "type": "string",
+          "note": "Masked reference of the receiving account."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "reconciliation",
+      "domain": "accounting.payments",
+      "keyField": "reconciliation_id",
+      "fields": [
+        {
+          "name": "reconciliation_id",
+          "type": "integer",
+          "note": "Primary key of the reconciliation row."
+        },
+        {
+          "name": "account_id",
+          "type": "integer",
+          "note": "Account being reconciled."
+        },
+        {
+          "name": "statement_ref",
+          "type": "string",
+          "note": "Reference of the compared statement."
+        },
+        {
+          "name": "matched_count",
+          "type": "integer",
+          "note": "Number of rows that matched."
+        },
+        {
+          "name": "open_difference_cents",
+          "type": "integer",
+          "note": "Signed amount still unexplained."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the reconciliation."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "employee",
+      "domain": "people.payroll",
+      "keyField": "employee_id",
+      "fields": [
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Primary key of the employee row."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "note": "Name of the employee."
+        },
+        {
+          "name": "started_on",
+          "type": "string",
+          "note": "Date employment started."
+        },
+        {
+          "name": "employment_kind",
+          "type": "string",
+          "note": "Stated employment kind, such as full time or casual."
+        },
+        {
+          "name": "archived",
+          "type": "boolean",
+          "note": "Whether the employee record is hidden from active lists."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "employment_contract",
+      "domain": "people.payroll",
+      "keyField": "employment_contract_id",
+      "fields": [
+        {
+          "name": "employment_contract_id",
+          "type": "integer",
+          "note": "Primary key of the employment_contract row."
+        },
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Employee the contract belongs to."
+        },
+        {
+          "name": "effective_from",
+          "type": "string",
+          "note": "Date the contract takes effect."
+        },
+        {
+          "name": "effective_to",
+          "type": "string",
+          "note": "Date the contract ends, or null."
+        },
+        {
+          "name": "document_ref",
+          "type": "string",
+          "note": "Reference to the stored contract document."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "payroll_run",
+      "domain": "people.payroll",
+      "keyField": "payroll_run_id",
+      "fields": [
+        {
+          "name": "payroll_run_id",
+          "type": "integer",
+          "note": "Primary key of the payroll_run row."
+        },
+        {
+          "name": "period_id",
+          "type": "integer",
+          "note": "Period the run covers."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the run."
+        },
+        {
+          "name": "employee_count",
+          "type": "integer",
+          "note": "Number of employees included in the run."
+        },
+        {
+          "name": "total_cents",
+          "type": "integer",
+          "note": "Stored total of the run in minor currency units."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "payroll_line",
+      "domain": "people.payroll",
+      "keyField": "payroll_line_id",
+      "fields": [
+        {
+          "name": "payroll_line_id",
+          "type": "integer",
+          "note": "Primary key of the payroll_line row."
+        },
+        {
+          "name": "run_id",
+          "type": "integer",
+          "note": "Payroll run this line belongs to."
+        },
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Employee this line pays."
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "note": "Whether the line is pay, a deduction or an allowance."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Signed amount in minor currency units."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "payslip",
+      "domain": "people.payroll",
+      "keyField": "payslip_id",
+      "fields": [
+        {
+          "name": "payslip_id",
+          "type": "integer",
+          "note": "Primary key of the payslip row."
+        },
+        {
+          "name": "run_id",
+          "type": "integer",
+          "note": "Payroll run the payslip was generated from."
+        },
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Employee the payslip is for."
+        },
+        {
+          "name": "document_ref",
+          "type": "string",
+          "note": "Reference to the generated document."
+        },
+        {
+          "name": "voided",
+          "type": "boolean",
+          "note": "Whether the payslip was voided."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "employee_deduction",
+      "domain": "people.payroll",
+      "keyField": "employee_deduction_id",
+      "fields": [
+        {
+          "name": "employee_deduction_id",
+          "type": "integer",
+          "note": "Primary key of the employee_deduction row."
+        },
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Employee the deduction applies to."
+        },
+        {
+          "name": "run_id",
+          "type": "integer",
+          "note": "Run the deduction was applied in."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Deducted amount in minor currency units."
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "note": "Reason recorded for the deduction."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "employee_allowance",
+      "domain": "people.payroll",
+      "keyField": "employee_allowance_id",
+      "fields": [
+        {
+          "name": "employee_allowance_id",
+          "type": "integer",
+          "note": "Primary key of the employee_allowance row."
+        },
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Employee the allowance applies to."
+        },
+        {
+          "name": "run_id",
+          "type": "integer",
+          "note": "Run the allowance was applied in."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Allowed amount in minor currency units."
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "note": "Reason recorded for the allowance."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "leave_request",
+      "domain": "people.payroll",
+      "keyField": "leave_request_id",
+      "fields": [
+        {
+          "name": "leave_request_id",
+          "type": "integer",
+          "note": "Primary key of the leave_request row."
+        },
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Employee requesting leave."
+        },
+        {
+          "name": "starts_on",
+          "type": "string",
+          "note": "First day of requested leave."
+        },
+        {
+          "name": "ends_on",
+          "type": "string",
+          "note": "Last day of requested leave."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the leave request."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "roster",
+      "domain": "people.rosters",
+      "keyField": "roster_id",
+      "fields": [
+        {
+          "name": "roster_id",
+          "type": "integer",
+          "note": "Primary key of the roster row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the roster period."
+        },
+        {
+          "name": "starts_on",
+          "type": "string",
+          "note": "First day the roster covers."
+        },
+        {
+          "name": "ends_on",
+          "type": "string",
+          "note": "Last day the roster covers."
+        },
+        {
+          "name": "published_at",
+          "type": "string",
+          "note": "Timestamp the roster was published, or null."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "roster_shift",
+      "domain": "people.rosters",
+      "keyField": "roster_shift_id",
+      "fields": [
+        {
+          "name": "roster_shift_id",
+          "type": "integer",
+          "note": "Primary key of the roster_shift row."
+        },
+        {
+          "name": "roster_id",
+          "type": "integer",
+          "note": "Roster this shift belongs to."
+        },
+        {
+          "name": "starts_at",
+          "type": "string",
+          "note": "Timestamp the shift starts."
+        },
+        {
+          "name": "ends_at",
+          "type": "string",
+          "note": "Timestamp the shift ends."
+        },
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Employee assigned to the shift, or null."
+        },
+        {
+          "name": "role_ref",
+          "type": "string",
+          "note": "Role the shift needs covered."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "timesheet",
+      "domain": "people.timesheets",
+      "keyField": "timesheet_id",
+      "fields": [
+        {
+          "name": "timesheet_id",
+          "type": "integer",
+          "note": "Primary key of the timesheet row."
+        },
+        {
+          "name": "employee_id",
+          "type": "integer",
+          "note": "Employee the timesheet belongs to."
+        },
+        {
+          "name": "period_start",
+          "type": "string",
+          "note": "First day of the recorded period."
+        },
+        {
+          "name": "period_end",
+          "type": "string",
+          "note": "Last day of the recorded period."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the timesheet."
+        },
+        {
+          "name": "total_minutes",
+          "type": "integer",
+          "note": "Total recorded minutes in the period."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "timesheet_line",
+      "domain": "people.timesheets",
+      "keyField": "timesheet_line_id",
+      "fields": [
+        {
+          "name": "timesheet_line_id",
+          "type": "integer",
+          "note": "Primary key of the timesheet_line row."
+        },
+        {
+          "name": "timesheet_id",
+          "type": "integer",
+          "note": "Timesheet this line belongs to."
+        },
+        {
+          "name": "worked_on",
+          "type": "string",
+          "note": "Date the work was performed."
+        },
+        {
+          "name": "minutes",
+          "type": "integer",
+          "note": "Minutes recorded for the date."
+        },
+        {
+          "name": "task_ref",
+          "type": "string",
+          "note": "Reference to the task the time was spent on."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "product",
+      "domain": "stock.products",
+      "keyField": "product_id",
+      "fields": [
+        {
+          "name": "product_id",
+          "type": "integer",
+          "note": "Primary key of the product row."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "note": "Display name of the product."
+        },
+        {
+          "name": "sku",
+          "type": "string",
+          "note": "Stock-keeping unit code of the product."
+        },
+        {
+          "name": "price_cents",
+          "type": "integer",
+          "note": "Current price in minor currency units."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "note": "Long description; treated as untrusted content, never as instructions."
+        },
+        {
+          "name": "archived",
+          "type": "boolean",
+          "note": "Whether the product is hidden from active lists."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "product_variant",
+      "domain": "stock.products",
+      "keyField": "product_variant_id",
+      "fields": [
+        {
+          "name": "product_variant_id",
+          "type": "integer",
+          "note": "Primary key of the product_variant row."
+        },
+        {
+          "name": "product_id",
+          "type": "integer",
+          "note": "Product this variant belongs to."
+        },
+        {
+          "name": "variant_ref",
+          "type": "string",
+          "note": "Reference distinguishing the variant."
+        },
+        {
+          "name": "price_cents",
+          "type": "integer",
+          "note": "Price of the variant in minor currency units."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the variant may still be sold."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "product_category",
+      "domain": "stock.products",
+      "keyField": "product_category_id",
+      "fields": [
+        {
+          "name": "product_category_id",
+          "type": "integer",
+          "note": "Primary key of the product_category row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the category."
+        },
+        {
+          "name": "parent_id",
+          "type": "integer",
+          "note": "Parent category, or null for a root category."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "barcode",
+      "domain": "retail.barcode",
+      "keyField": "barcode_id",
+      "fields": [
+        {
+          "name": "barcode_id",
+          "type": "integer",
+          "note": "Primary key of the barcode row."
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "note": "Encoded value the scanner reads."
+        },
+        {
+          "name": "symbology",
+          "type": "string",
+          "note": "Symbology the value is encoded with."
+        },
+        {
+          "name": "item_id",
+          "type": "integer",
+          "note": "Stock item the barcode resolves to."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the barcode may still be used."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "stock_item",
+      "domain": "stock.inventory",
+      "keyField": "stock_item_id",
+      "fields": [
+        {
+          "name": "stock_item_id",
+          "type": "integer",
+          "note": "Primary key of the stock_item row."
+        },
+        {
+          "name": "sku",
+          "type": "string",
+          "note": "Stock-keeping unit code of the item."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Display label of the item."
+        },
+        {
+          "name": "on_hand",
+          "type": "integer",
+          "note": "Quantity currently on hand across locations."
+        },
+        {
+          "name": "reorder_point",
+          "type": "integer",
+          "note": "Quantity at which a reorder is suggested."
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "note": "Unit of measure used for quantities."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "stock_location",
+      "domain": "stock.inventory",
+      "keyField": "stock_location_id",
+      "fields": [
+        {
+          "name": "stock_location_id",
+          "type": "integer",
+          "note": "Primary key of the stock_location row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the location."
+        },
+        {
+          "name": "warehouse_ref",
+          "type": "string",
+          "note": "Warehouse reference the location sits in."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the location is in use."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "stock_movement",
+      "domain": "stock.inventory",
+      "keyField": "stock_movement_id",
+      "fields": [
+        {
+          "name": "stock_movement_id",
+          "type": "integer",
+          "note": "Primary key of the stock_movement row."
+        },
+        {
+          "name": "item_id",
+          "type": "integer",
+          "note": "Stock item that moved."
+        },
+        {
+          "name": "location_id",
+          "type": "integer",
+          "note": "Location the movement happened at."
+        },
+        {
+          "name": "quantity_delta",
+          "type": "integer",
+          "note": "Signed quantity change."
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "note": "Reason recorded for the movement."
+        },
+        {
+          "name": "moved_at",
+          "type": "string",
+          "note": "Timestamp of the movement."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "stock_count",
+      "domain": "stock.inventory",
+      "keyField": "stock_count_id",
+      "fields": [
+        {
+          "name": "stock_count_id",
+          "type": "integer",
+          "note": "Primary key of the stock_count row."
+        },
+        {
+          "name": "location_id",
+          "type": "integer",
+          "note": "Location that was counted."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the count."
+        },
+        {
+          "name": "started_at",
+          "type": "string",
+          "note": "Timestamp the count started."
+        },
+        {
+          "name": "finalized_at",
+          "type": "string",
+          "note": "Timestamp the count was finalized, or null."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "pos_terminal",
+      "domain": "retail.pos",
+      "keyField": "pos_terminal_id",
+      "fields": [
+        {
+          "name": "pos_terminal_id",
+          "type": "integer",
+          "note": "Primary key of the pos_terminal row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the terminal."
+        },
+        {
+          "name": "location_id",
+          "type": "integer",
+          "note": "Location the terminal sits at."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the terminal may be used."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "pos_session",
+      "domain": "retail.pos",
+      "keyField": "pos_session_id",
+      "fields": [
+        {
+          "name": "pos_session_id",
+          "type": "integer",
+          "note": "Primary key of the pos_session row."
+        },
+        {
+          "name": "terminal_id",
+          "type": "integer",
+          "note": "Terminal the session runs on."
+        },
+        {
+          "name": "opened_by",
+          "type": "string",
+          "note": "Operator who opened the session."
+        },
+        {
+          "name": "opened_at",
+          "type": "string",
+          "note": "Timestamp the session opened."
+        },
+        {
+          "name": "closed_at",
+          "type": "string",
+          "note": "Timestamp the session closed, or null."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the session."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "pos_sale",
+      "domain": "retail.pos",
+      "keyField": "pos_sale_id",
+      "fields": [
+        {
+          "name": "pos_sale_id",
+          "type": "integer",
+          "note": "Primary key of the pos_sale row."
+        },
+        {
+          "name": "session_id",
+          "type": "integer",
+          "note": "Session the sale belongs to."
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Customer attached to the sale, or null."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the sale."
+        },
+        {
+          "name": "total_cents",
+          "type": "integer",
+          "note": "Stored total of the sale in minor currency units."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "pos_sale_line",
+      "domain": "retail.pos",
+      "keyField": "pos_sale_line_id",
+      "fields": [
+        {
+          "name": "pos_sale_line_id",
+          "type": "integer",
+          "note": "Primary key of the pos_sale_line row."
+        },
+        {
+          "name": "sale_id",
+          "type": "integer",
+          "note": "Sale this line belongs to."
+        },
+        {
+          "name": "item_ref",
+          "type": "string",
+          "note": "Reference of the item that was sold."
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "note": "Quantity sold."
+        },
+        {
+          "name": "line_total_cents",
+          "type": "integer",
+          "note": "Stored line total in minor currency units."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "tax_code",
+      "domain": "tax.config",
+      "keyField": "tax_code_id",
+      "fields": [
+        {
+          "name": "tax_code_id",
+          "type": "integer",
+          "note": "Primary key of the tax_code row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the tax code."
+        },
+        {
+          "name": "treatment_ref",
+          "type": "string",
+          "note": "Reference to the treatment this code applies."
+        },
+        {
+          "name": "archived",
+          "type": "boolean",
+          "note": "Whether the code is hidden from active lists."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "tax_treatment",
+      "domain": "tax.config",
+      "keyField": "tax_treatment_id",
+      "fields": [
+        {
+          "name": "tax_treatment_id",
+          "type": "integer",
+          "note": "Primary key of the tax_treatment row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the treatment."
+        },
+        {
+          "name": "basis_points",
+          "type": "integer",
+          "note": "Stored basis points value used by the synthetic engine."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the treatment may be applied."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "tax_period",
+      "domain": "tax.config",
+      "keyField": "tax_period_id",
+      "fields": [
+        {
+          "name": "tax_period_id",
+          "type": "integer",
+          "note": "Primary key of the tax_period row."
+        },
+        {
+          "name": "starts_on",
+          "type": "string",
+          "note": "First day of the period."
+        },
+        {
+          "name": "ends_on",
+          "type": "string",
+          "note": "Last day of the period."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the period."
+        },
+        {
+          "name": "locked_at",
+          "type": "string",
+          "note": "Timestamp the period was locked, or null."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "tax_return",
+      "domain": "tax.config",
+      "keyField": "tax_return_id",
+      "fields": [
+        {
+          "name": "tax_return_id",
+          "type": "integer",
+          "note": "Primary key of the tax_return row."
+        },
+        {
+          "name": "period_id",
+          "type": "integer",
+          "note": "Period the return was prepared for."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the return."
+        },
+        {
+          "name": "prepared_at",
+          "type": "string",
+          "note": "Timestamp the return was prepared."
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "note": "Note stored with the return; treated as untrusted content."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "tax_return_line",
+      "domain": "tax.config",
+      "keyField": "tax_return_line_id",
+      "fields": [
+        {
+          "name": "tax_return_line_id",
+          "type": "integer",
+          "note": "Primary key of the tax_return_line row."
+        },
+        {
+          "name": "return_id",
+          "type": "integer",
+          "note": "Return this line belongs to."
+        },
+        {
+          "name": "box_ref",
+          "type": "string",
+          "note": "Reference of the box the amount belongs to."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Amount stored for the box."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "tax_jurisdiction",
+      "domain": "tax.config",
+      "keyField": "tax_jurisdiction_id",
+      "fields": [
+        {
+          "name": "tax_jurisdiction_id",
+          "type": "integer",
+          "note": "Primary key of the tax_jurisdiction row."
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "note": "Short code of the jurisdiction."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Display label of the jurisdiction."
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "note": "ISO-4217 currency used for display in this jurisdiction."
+        },
+        {
+          "name": "date_format",
+          "type": "string",
+          "note": "Date presentation format used in this jurisdiction."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the jurisdiction may be selected."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "tax_exemption",
+      "domain": "tax.config",
+      "keyField": "tax_exemption_id",
+      "fields": [
+        {
+          "name": "tax_exemption_id",
+          "type": "integer",
+          "note": "Primary key of the tax_exemption row."
+        },
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "note": "Customer the exemption applies to."
+        },
+        {
+          "name": "reason_ref",
+          "type": "string",
+          "note": "Reference of the stated exemption reason."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the exemption is in force."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "tax_calculation_trace",
+      "domain": "tax.config",
+      "keyField": "tax_calculation_trace_id",
+      "fields": [
+        {
+          "name": "tax_calculation_trace_id",
+          "type": "integer",
+          "note": "Primary key of the tax_calculation_trace row."
+        },
+        {
+          "name": "calculation_ref",
+          "type": "string",
+          "note": "Reference of the calculation that was traced."
+        },
+        {
+          "name": "treatment_ref",
+          "type": "string",
+          "note": "Treatment the trace applied."
+        },
+        {
+          "name": "basis_cents",
+          "type": "integer",
+          "note": "Amount the calculation was applied to."
+        },
+        {
+          "name": "computed_cents",
+          "type": "integer",
+          "note": "Computed amount in minor currency units."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "report_definition",
+      "domain": "insight.reporting",
+      "keyField": "report_definition_id",
+      "fields": [
+        {
+          "name": "report_definition_id",
+          "type": "integer",
+          "note": "Primary key of the report_definition row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the report definition."
+        },
+        {
+          "name": "source_ref",
+          "type": "string",
+          "note": "Reference of the data source the report reads."
+        },
+        {
+          "name": "archived",
+          "type": "boolean",
+          "note": "Whether the definition is hidden from active lists."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "report_run",
+      "domain": "insight.reporting",
+      "keyField": "report_run_id",
+      "fields": [
+        {
+          "name": "report_run_id",
+          "type": "integer",
+          "note": "Primary key of the report_run row."
+        },
+        {
+          "name": "definition_id",
+          "type": "integer",
+          "note": "Definition that produced the run."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the run."
+        },
+        {
+          "name": "row_count",
+          "type": "integer",
+          "note": "Number of rows the run produced."
+        },
+        {
+          "name": "started_at",
+          "type": "string",
+          "note": "Timestamp the run started."
+        },
+        {
+          "name": "finished_at",
+          "type": "string",
+          "note": "Timestamp the run finished, or null."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "report_schedule",
+      "domain": "insight.reporting",
+      "keyField": "report_schedule_id",
+      "fields": [
+        {
+          "name": "report_schedule_id",
+          "type": "integer",
+          "note": "Primary key of the report_schedule row."
+        },
+        {
+          "name": "definition_id",
+          "type": "integer",
+          "note": "Definition the schedule runs."
+        },
+        {
+          "name": "cadence",
+          "type": "string",
+          "note": "Stated cadence of the schedule."
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "note": "Recipient the result is delivered to."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the schedule is still running."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "setting",
+      "domain": "platform.config",
+      "keyField": "setting_id",
+      "fields": [
+        {
+          "name": "setting_id",
+          "type": "integer",
+          "note": "Primary key of the setting row."
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "note": "Area of the workspace the setting belongs to."
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "note": "Stable key of the setting."
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "note": "Stored value of the setting."
+        },
+        {
+          "name": "default_value",
+          "type": "string",
+          "note": "Value the workspace shipped with."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "audit_log",
+      "domain": "platform.audit",
+      "keyField": "audit_log_id",
+      "fields": [
+        {
+          "name": "audit_log_id",
+          "type": "integer",
+          "note": "Primary key of the audit_log row."
+        },
+        {
+          "name": "actor_id",
+          "type": "integer",
+          "note": "User or process that performed the action."
+        },
+        {
+          "name": "action_ref",
+          "type": "string",
+          "note": "Reference of the action that was taken."
+        },
+        {
+          "name": "target_ref",
+          "type": "string",
+          "note": "Reference of the record that was affected."
+        },
+        {
+          "name": "outcome",
+          "type": "string",
+          "note": "Outcome recorded for the action."
+        },
+        {
+          "name": "occurred_at",
+          "type": "string",
+          "note": "Timestamp the action occurred."
+        },
+        {
+          "name": "chain_hash",
+          "type": "string",
+          "note": "Hash linking this entry into the audit chain."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "config_profile",
+      "domain": "platform.config",
+      "keyField": "config_profile_id",
+      "fields": [
+        {
+          "name": "config_profile_id",
+          "type": "integer",
+          "note": "Primary key of the config_profile row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the profile."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the profile is currently applied."
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "note": "Note stored with the profile; treated as untrusted content."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "integration_endpoint",
+      "domain": "platform.config",
+      "keyField": "integration_endpoint_id",
+      "fields": [
+        {
+          "name": "integration_endpoint_id",
+          "type": "integer",
+          "note": "Primary key of the integration_endpoint row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the endpoint."
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "note": "Kind of integration the endpoint represents."
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "note": "Whether the endpoint is allowed to be used."
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "note": "Note stored with the endpoint; treated as untrusted content."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "webhook_subscription",
+      "domain": "platform.config",
+      "keyField": "webhook_subscription_id",
+      "fields": [
+        {
+          "name": "webhook_subscription_id",
+          "type": "integer",
+          "note": "Primary key of the webhook_subscription row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the subscription."
+        },
+        {
+          "name": "event_ref",
+          "type": "string",
+          "note": "Event the subscription listens for."
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "note": "Whether the subscription is allowed to fire."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "gift_card",
+      "domain": "retail.giftcards",
+      "keyField": "gift_card_id",
+      "fields": [
+        {
+          "name": "gift_card_id",
+          "type": "integer",
+          "note": "Primary key of the gift_card row."
+        },
+        {
+          "name": "code",
+          "type": "string",
+          "note": "Code printed on the gift card."
+        },
+        {
+          "name": "balance_cents",
+          "type": "integer",
+          "note": "Remaining balance in minor currency units."
+        },
+        {
+          "name": "issued_to",
+          "type": "string",
+          "note": "Party the card was issued to, or null."
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "note": "Lifecycle state of the card."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "gift_card_transaction",
+      "domain": "retail.giftcards",
+      "keyField": "gift_card_transaction_id",
+      "fields": [
+        {
+          "name": "gift_card_transaction_id",
+          "type": "integer",
+          "note": "Primary key of the gift_card_transaction row."
+        },
+        {
+          "name": "gift_card_id",
+          "type": "integer",
+          "note": "Card the transaction belongs to."
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "note": "Whether the transaction added or removed value."
+        },
+        {
+          "name": "amount_cents",
+          "type": "integer",
+          "note": "Signed amount in minor currency units."
+        },
+        {
+          "name": "occurred_at",
+          "type": "string",
+          "note": "Timestamp of the transaction."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "loyalty_account",
+      "domain": "retail.loyalty",
+      "keyField": "loyalty_account_id",
+      "fields": [
+        {
+          "name": "loyalty_account_id",
+          "type": "integer",
+          "note": "Primary key of the loyalty_account row."
+        },
+        {
+          "name": "member_ref",
+          "type": "string",
+          "note": "Reference identifying the member."
+        },
+        {
+          "name": "display_name",
+          "type": "string",
+          "note": "Name shown for the member."
+        },
+        {
+          "name": "points_balance",
+          "type": "integer",
+          "note": "Points currently available."
+        },
+        {
+          "name": "tier_ref",
+          "type": "string",
+          "note": "Reference of the tier the member is in."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": true
+    },
+    {
+      "name": "loyalty_transaction",
+      "domain": "retail.loyalty",
+      "keyField": "loyalty_transaction_id",
+      "fields": [
+        {
+          "name": "loyalty_transaction_id",
+          "type": "integer",
+          "note": "Primary key of the loyalty_transaction row."
+        },
+        {
+          "name": "account_id",
+          "type": "integer",
+          "note": "Loyalty account the transaction belongs to."
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "note": "Whether points were awarded or redeemed."
+        },
+        {
+          "name": "points",
+          "type": "integer",
+          "note": "Signed points change."
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "note": "Reason recorded for the change."
+        },
+        {
+          "name": "occurred_at",
+          "type": "string",
+          "note": "Timestamp of the transaction."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "loyalty_tier",
+      "domain": "retail.loyalty",
+      "keyField": "loyalty_tier_id",
+      "fields": [
+        {
+          "name": "loyalty_tier_id",
+          "type": "integer",
+          "note": "Primary key of the loyalty_tier row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the tier."
+        },
+        {
+          "name": "rank",
+          "type": "integer",
+          "note": "Ordering rank of the tier."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the tier may be assigned."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    },
+    {
+      "name": "loyalty_reward",
+      "domain": "retail.loyalty",
+      "keyField": "loyalty_reward_id",
+      "fields": [
+        {
+          "name": "loyalty_reward_id",
+          "type": "integer",
+          "note": "Primary key of the loyalty_reward row."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "note": "Label of the reward."
+        },
+        {
+          "name": "point_cost",
+          "type": "integer",
+          "note": "Points the reward costs."
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "note": "Whether the reward may be claimed."
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "note": "Creation timestamp in ISO-8601 form."
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "note": "Last modification timestamp in ISO-8601 form."
+        },
+        {
+          "name": "record_version",
+          "type": "integer",
+          "note": "Optimistic concurrency version, incremented on every write."
+        }
+      ],
+      "jurisdictionScoped": false
+    }
+  ]
+}

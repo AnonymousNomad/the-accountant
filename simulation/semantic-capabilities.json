@@ -1,0 +1,3506 @@
+{
+  "$schemaNote": "SCALE-FAITHFUL / BEHAVIOR-SYNTHETIC / NOT A REPLICA of any external system. No real accounting, tax or payroll rules exist here.",
+  "selectionNote": "56 capabilities chosen: all 36 mandated identifiers (the build instruction names 35 but enumerates 36 distinct ids, so every enumerated id is present) plus 20 additions the workflows need (record lookups for every entity the tasks resolve, draft-note edits, quote and invoice send, invoice void, journal and payment reversal, trial balance and period reads, timesheet submit, roster publish, stock receive, catalog create, receipt read, gift card issue, loyalty award, report scheduling, payslip read and jurisdiction period read). 56 keeps every task surface at tens, not hundreds, while covering every workflow in task-corpus.jsonl. mapsToRoutes: the 36 mandated capabilities reproduce the topology route file own semanticCapability assignments (52 routes, some capabilities drive two or three), and the 20 added capabilities bind to real routes of the same family that the topology leaves unassigned; scripts/verify-simulation.mjs re-checks every binding.",
+  "capabilities": [
+    {
+      "id": "customer.search",
+      "version": 1,
+      "description": "Search existing customer records by a name fragment and return the matching identifiers.",
+      "whenToUse": "Use when the user names a customer but no identifier is known, or before creating one to check whether it already exists.",
+      "whenNotToUse": "Do not use to create or change a customer, and do not use when an identifier has already been supplied.",
+      "domain": "accounting.customers",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "nonPlaceholder": true,
+            "description": "Name fragment to search for, exactly as the user stated it."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25,
+            "description": "Maximum matches to return (default 10)."
+          }
+        }
+      },
+      "outputSummary": "The match count and a bounded list of customers with identifier, name, email and record version.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no customer data changes."
+      ],
+      "relatedCapabilities": [
+        "customer.lookup",
+        "customer.create",
+        "customer.update"
+      ],
+      "tags": [
+        "customer",
+        "client",
+        "search",
+        "find",
+        "lookup",
+        "name",
+        "existing"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "customer.search"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.customer.search",
+        "route.customer.get"
+      ]
+    },
+    {
+      "id": "customer.create",
+      "version": 1,
+      "description": "Create a new customer record from a name and an optional billing email.",
+      "whenToUse": "Use only when the user asks for a customer that does not already exist; search first so a duplicate is not created.",
+      "whenNotToUse": "Do not use when a matching customer may already exist, and do not use to change an existing record.",
+      "domain": "accounting.customers",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          },
+          "email": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 120,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+          }
+        }
+      },
+      "outputSummary": "The new customer identifier, the stored name and email, and the initial record version.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Creates a persistent customer record."
+      ],
+      "relatedCapabilities": [
+        "customer.search",
+        "customer.lookup",
+        "customer.update"
+      ],
+      "tags": [
+        "customer",
+        "client",
+        "create",
+        "new",
+        "add",
+        "register"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "customer.create"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.customer.create"
+      ]
+    },
+    {
+      "id": "customer.update",
+      "version": 1,
+      "description": "Change the name or billing email of an existing customer record.",
+      "whenToUse": "Use when the user asks to correct details of a customer that is already identified by an identifier.",
+      "whenNotToUse": "Do not use to create a customer, and do not use without an identifier obtained from a search or supplied by the user.",
+      "domain": "accounting.customers",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "customerId"
+        ],
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^CUS-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          },
+          "email": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 120,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+          }
+        }
+      },
+      "outputSummary": "The updated customer identifier, the stored name and email, and the incremented record version.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Modifies a persistent customer record and increments its version."
+      ],
+      "relatedCapabilities": [
+        "customer.search",
+        "customer.lookup",
+        "customer.create"
+      ],
+      "tags": [
+        "customer",
+        "client",
+        "update",
+        "change",
+        "edit",
+        "correct"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "customer.update"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.customer.update"
+      ]
+    },
+    {
+      "id": "customer.lookup",
+      "version": 1,
+      "description": "Read one customer record by identifier, including its record version and status.",
+      "whenToUse": "Use when the identifier is already known and the user needs the stored details confirmed.",
+      "whenNotToUse": "Do not use to search by name, and do not use to change any stored field.",
+      "domain": "accounting.customers",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "customerId"
+        ],
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^CUS-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The customer identifier, name, email, status and record version as stored.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no customer data changes."
+      ],
+      "relatedCapabilities": [
+        "customer.search",
+        "customer.update"
+      ],
+      "tags": [
+        "customer",
+        "client",
+        "read",
+        "open",
+        "lookup",
+        "version"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "customer.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.customer.list"
+      ]
+    },
+    {
+      "id": "supplier.search",
+      "version": 1,
+      "description": "Search supplier records by a name fragment and return the matching identifiers.",
+      "whenToUse": "Use when the user names a supplier but no identifier is known, or before adding one to check for an existing entry.",
+      "whenNotToUse": "Do not use to create or change a supplier, and do not use when an identifier has already been supplied.",
+      "domain": "accounting.suppliers",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 25
+          }
+        }
+      },
+      "outputSummary": "The match count and a bounded list of suppliers with identifier, name and account status.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no supplier data changes."
+      ],
+      "relatedCapabilities": [
+        "supplier.lookup",
+        "supplier.create",
+        "supplier.update"
+      ],
+      "tags": [
+        "supplier",
+        "vendor",
+        "search",
+        "find",
+        "lookup",
+        "name",
+        "existing"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "supplier.search"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.supplier.search",
+        "route.supplier.get"
+      ]
+    },
+    {
+      "id": "supplier.create",
+      "version": 1,
+      "description": "Create a new supplier record from a name and an optional orders email.",
+      "whenToUse": "Use only when the user asks for a supplier that does not already exist; search first to avoid a duplicate entry.",
+      "whenNotToUse": "Do not use when a similar supplier may already exist, and do not use to change an existing record.",
+      "domain": "accounting.suppliers",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          },
+          "email": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 120,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+          }
+        }
+      },
+      "outputSummary": "The new supplier identifier, the stored name and email, and the initial record status.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Creates a persistent supplier record."
+      ],
+      "relatedCapabilities": [
+        "supplier.search",
+        "supplier.lookup",
+        "supplier.update"
+      ],
+      "tags": [
+        "supplier",
+        "vendor",
+        "create",
+        "new",
+        "add"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "supplier.create"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.supplier.create"
+      ]
+    },
+    {
+      "id": "supplier.update",
+      "version": 1,
+      "description": "Change the contact name or orders email of an existing supplier record.",
+      "whenToUse": "Use when the user asks to correct supplier details and the supplier is identified by an identifier.",
+      "whenNotToUse": "Do not use to create a supplier, and do not use without an identifier obtained from a search.",
+      "domain": "accounting.suppliers",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "supplierId"
+        ],
+        "properties": {
+          "supplierId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^SUP-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "contactName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          },
+          "email": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 120,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+          }
+        }
+      },
+      "outputSummary": "The updated supplier identifier, the stored contact name and email, and the new record version.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Modifies a persistent supplier record and increments its version."
+      ],
+      "relatedCapabilities": [
+        "supplier.search",
+        "supplier.lookup",
+        "supplier.create"
+      ],
+      "tags": [
+        "supplier",
+        "vendor",
+        "update",
+        "change",
+        "contact",
+        "edit"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "supplier.update"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.supplier.update"
+      ]
+    },
+    {
+      "id": "supplier.lookup",
+      "version": 1,
+      "description": "Read one supplier record by identifier, including its account status.",
+      "whenToUse": "Use when the supplier identifier is known and the user needs the stored details confirmed.",
+      "whenNotToUse": "Do not use to search by name, and do not use to change any stored field.",
+      "domain": "accounting.suppliers",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "supplierId"
+        ],
+        "properties": {
+          "supplierId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^SUP-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The supplier identifier, name, orders email and account status as stored.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no supplier data changes."
+      ],
+      "relatedCapabilities": [
+        "supplier.search",
+        "supplier.update"
+      ],
+      "tags": [
+        "supplier",
+        "vendor",
+        "read",
+        "open",
+        "lookup",
+        "status"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "supplier.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.supplier.list"
+      ]
+    },
+    {
+      "id": "quote.create_draft",
+      "version": 1,
+      "description": "Create a draft quote for an existing customer from priced lines. A draft has no financial effect.",
+      "whenToUse": "Use when the user wants a quote prepared for review and the customer and priced lines are known.",
+      "whenNotToUse": "Do not use to issue or send a quote, and do not invent lines or prices the user did not state.",
+      "domain": "accounting.quotes",
+      "risk": "DRAFT",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "customerId",
+          "lines"
+        ],
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^CUS-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "lines": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "description",
+                "quantity",
+                "unitPriceCents"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 120,
+                  "nonPlaceholder": true,
+                  "description": "Line description exactly as the user stated it."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "unitPriceCents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              }
+            }
+          }
+        }
+      },
+      "outputSummary": "The new quote identifier, its draft status, the lines as stored and the computed total in cents.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Creates a draft quote record with no posted financial effect."
+      ],
+      "relatedCapabilities": [
+        "customer.search",
+        "quote.lookup",
+        "quote.issue",
+        "invoice.create_draft"
+      ],
+      "tags": [
+        "quote",
+        "estimate",
+        "draft",
+        "create",
+        "prepare",
+        "lines"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "quote.create_draft"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.quote.create_draft",
+        "route.quote.revise"
+      ]
+    },
+    {
+      "id": "quote.issue",
+      "version": 1,
+      "description": "Issue a draft quote so the customer can accept it, and freeze its lines.",
+      "whenToUse": "Use when the user asks to issue a quote that exists and its lines are final.",
+      "whenNotToUse": "Do not use on a quote that is already issued or converted, and do not use to send the quote to a recipient.",
+      "domain": "accounting.quotes",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "quoteId"
+        ],
+        "properties": {
+          "quoteId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^QTE-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The quote identifier, its issued status, the frozen total and the issue version.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Changes quote status to issued and prevents further line edits."
+      ],
+      "relatedCapabilities": [
+        "quote.create_draft",
+        "quote.lookup",
+        "quote.send",
+        "quote.convert_to_invoice"
+      ],
+      "tags": [
+        "quote",
+        "estimate",
+        "issue",
+        "finalise",
+        "send"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "quote.issue"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.quote.issue"
+      ]
+    },
+    {
+      "id": "quote.convert_to_invoice",
+      "version": 1,
+      "description": "Convert an existing quote into a draft invoice for the same customer.",
+      "whenToUse": "Use when the user asks to turn a quote into an invoice and the quote is identified.",
+      "whenNotToUse": "Do not use on a quote that is still a draft with unconfirmed lines, and do not use to issue the resulting invoice.",
+      "domain": "accounting.quotes",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "quoteId"
+        ],
+        "properties": {
+          "quoteId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^QTE-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The new draft invoice identifier, the source quote identifier and the copied lines.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Creates a draft invoice linked to the quote; the quote is marked converted."
+      ],
+      "relatedCapabilities": [
+        "quote.lookup",
+        "quote.issue",
+        "invoice.create_draft"
+      ],
+      "tags": [
+        "quote",
+        "invoice",
+        "convert",
+        "transfer",
+        "draft"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "quote.convert_to_invoice"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.quote.convert_to_invoice"
+      ]
+    },
+    {
+      "id": "quote.lookup",
+      "version": 1,
+      "description": "Read one quote by identifier: status, lines, total and linked invoice.",
+      "whenToUse": "Use when the user asks what a quote currently contains or whether it is still a draft.",
+      "whenNotToUse": "Do not use to change a quote, and do not use to search for a quote by customer name.",
+      "domain": "accounting.quotes",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "quoteId"
+        ],
+        "properties": {
+          "quoteId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^QTE-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The quote identifier, status, lines, total in cents and any linked invoice identifier.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no quote data changes."
+      ],
+      "relatedCapabilities": [
+        "quote.create_draft",
+        "quote.issue",
+        "quote.update_draft"
+      ],
+      "tags": [
+        "quote",
+        "estimate",
+        "read",
+        "open",
+        "preview",
+        "status"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "quote.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.quote.get"
+      ]
+    },
+    {
+      "id": "quote.update_draft",
+      "version": 1,
+      "description": "Change the working notes of a quote that is still in draft.",
+      "whenToUse": "Use when the user asks to annotate a draft quote while its lines are still being negotiated.",
+      "whenNotToUse": "Do not use on an issued or converted quote, and do not use to change prices the user did not state.",
+      "domain": "accounting.quotes",
+      "risk": "DRAFT",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "quoteId",
+          "notes"
+        ],
+        "properties": {
+          "quoteId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^QTE-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 240,
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The quote identifier, the stored notes and the unchanged draft status.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Modifies the draft quote notes and increments its version."
+      ],
+      "relatedCapabilities": [
+        "quote.lookup",
+        "quote.create_draft",
+        "quote.issue"
+      ],
+      "tags": [
+        "quote",
+        "draft",
+        "notes",
+        "update",
+        "annotate"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "quote.update_draft"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.quote.update"
+      ]
+    },
+    {
+      "id": "quote.send",
+      "version": 1,
+      "description": "Send an issued quote to a recipient email address.",
+      "whenToUse": "Use when the user asks for a quote to go out to the customer and the quote is already issued.",
+      "whenNotToUse": "Do not use on a draft quote, and do not use when the recipient address is unknown and was not supplied.",
+      "domain": "accounting.quotes",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "quoteId"
+        ],
+        "properties": {
+          "quoteId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^QTE-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "recipientEmail": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 120,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+          }
+        }
+      },
+      "outputSummary": "The quote identifier, the delivery status and the recipient address used.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Sends an outbound message and records a delivery entry."
+      ],
+      "relatedCapabilities": [
+        "quote.issue",
+        "quote.lookup"
+      ],
+      "tags": [
+        "quote",
+        "send",
+        "email",
+        "deliver"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "quote.send"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.quote.send"
+      ]
+    },
+    {
+      "id": "invoice.create_draft",
+      "version": 1,
+      "description": "Create a draft invoice for an existing customer from priced lines. A draft is not posted.",
+      "whenToUse": "Use when the user wants an invoice prepared for review and the customer and priced lines are known.",
+      "whenNotToUse": "Do not use to issue or send an invoice, and do not invent lines or amounts the user did not state.",
+      "domain": "accounting.invoices",
+      "risk": "DRAFT",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "customerId",
+          "lines"
+        ],
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^CUS-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "lines": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "description",
+                "quantity",
+                "unitPriceCents"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 120,
+                  "nonPlaceholder": true,
+                  "description": "Line description exactly as the user stated it."
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000
+                },
+                "unitPriceCents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000000
+                }
+              }
+            }
+          }
+        }
+      },
+      "outputSummary": "The new invoice identifier, its draft status, the lines as stored and the computed total in cents.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Creates a draft invoice record with no posted financial effect."
+      ],
+      "relatedCapabilities": [
+        "customer.search",
+        "invoice.preview",
+        "invoice.update_draft",
+        "invoice.issue"
+      ],
+      "tags": [
+        "invoice",
+        "bill",
+        "draft",
+        "create",
+        "prepare",
+        "lines"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "invoice.create_draft"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.invoice.create_draft"
+      ]
+    },
+    {
+      "id": "invoice.preview",
+      "version": 1,
+      "description": "Read a draft or issued invoice: status, lines, total and due date. Never changes state.",
+      "whenToUse": "Use to check what an invoice currently contains, or to confirm its status before issuing it.",
+      "whenNotToUse": "Do not use to change or issue an invoice, and do not use when the user asked for a different document.",
+      "domain": "accounting.invoices",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "invoiceId"
+        ],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "pattern": "^INV-[0-9]{5}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The invoice identifier, status, lines, total in cents and due date as stored.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no invoice data changes."
+      ],
+      "relatedCapabilities": [
+        "invoice.create_draft",
+        "invoice.lookup",
+        "invoice.issue"
+      ],
+      "tags": [
+        "invoice",
+        "bill",
+        "read",
+        "preview",
+        "status",
+        "lines"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "invoice.preview"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.invoice.get",
+        "route.invoice.preview"
+      ]
+    },
+    {
+      "id": "invoice.issue",
+      "version": 1,
+      "description": "Issue a draft invoice, which posts it to the receivables ledger and fixes its total.",
+      "whenToUse": "Use when the user explicitly asks to issue an invoice that exists as a draft and its lines are final.",
+      "whenNotToUse": "Do not use on an invoice that is already issued or void, and do not use when the amount is still being disputed.",
+      "domain": "accounting.invoices",
+      "risk": "FINANCIAL",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "invoiceId"
+        ],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "pattern": "^INV-[0-9]{5}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The invoice identifier, its issued status, the posted total in cents and the ledger entry created.",
+      "requiredPermissions": [
+        "accounting.write",
+        "accounting.financial"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Posts the invoice to the receivables ledger and prevents further line edits."
+      ],
+      "relatedCapabilities": [
+        "invoice.preview",
+        "invoice.create_draft",
+        "invoice.send",
+        "invoice.void"
+      ],
+      "tags": [
+        "invoice",
+        "bill",
+        "issue",
+        "post",
+        "receivables"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "invoice.issue"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.invoice.issue"
+      ]
+    },
+    {
+      "id": "invoice.send",
+      "version": 1,
+      "description": "Send an issued invoice to the customer, or to a recipient address the user supplies.",
+      "whenToUse": "Use when the user asks for an invoice to go to the customer and the invoice is already issued.",
+      "whenNotToUse": "Do not use on a draft invoice, and do not use when the recipient is unknown and was not supplied.",
+      "domain": "accounting.invoices",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "invoiceId"
+        ],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "pattern": "^INV-[0-9]{5}$",
+            "nonPlaceholder": true
+          },
+          "recipientEmail": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 120,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+          }
+        }
+      },
+      "outputSummary": "The invoice identifier, the delivery status and the recipient address used.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Sends an outbound message and records a delivery entry."
+      ],
+      "relatedCapabilities": [
+        "invoice.issue",
+        "invoice.lookup"
+      ],
+      "tags": [
+        "invoice",
+        "send",
+        "email",
+        "deliver",
+        "customer"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "invoice.send"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.invoice.send"
+      ]
+    },
+    {
+      "id": "invoice.lookup",
+      "version": 1,
+      "description": "Read the summary of one invoice: status, total, amount outstanding and due date.",
+      "whenToUse": "Use when the user names an invoice identifier and wants its current standing.",
+      "whenNotToUse": "Do not use to read full lines, and do not use to change or issue an invoice.",
+      "domain": "accounting.invoices",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "invoiceId"
+        ],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "pattern": "^INV-[0-9]{5}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The invoice identifier, status, total and outstanding amounts in cents, and the due date.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no invoice data changes."
+      ],
+      "relatedCapabilities": [
+        "invoice.preview",
+        "payment.lookup",
+        "invoice.send"
+      ],
+      "tags": [
+        "invoice",
+        "read",
+        "summary",
+        "outstanding",
+        "due"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "invoice.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.invoice.list"
+      ]
+    },
+    {
+      "id": "invoice.update_draft",
+      "version": 1,
+      "description": "Change the internal note of an invoice that is still in draft.",
+      "whenToUse": "Use when the user asks to annotate a draft invoice before it is issued.",
+      "whenNotToUse": "Do not use on an issued or void invoice, and do not use to change amounts the user did not state.",
+      "domain": "accounting.invoices",
+      "risk": "DRAFT",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "invoiceId",
+          "internalNote"
+        ],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "pattern": "^INV-[0-9]{5}$",
+            "nonPlaceholder": true
+          },
+          "internalNote": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 240,
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The invoice identifier, the stored internal note and the unchanged draft status.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Modifies the draft invoice note and increments its version."
+      ],
+      "relatedCapabilities": [
+        "invoice.create_draft",
+        "invoice.preview",
+        "invoice.issue"
+      ],
+      "tags": [
+        "invoice",
+        "draft",
+        "note",
+        "update",
+        "annotate"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "invoice.update_draft"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.invoice.internal_note.update"
+      ]
+    },
+    {
+      "id": "invoice.void",
+      "version": 1,
+      "description": "Void an issued invoice that should not stand, reversing its posted ledger effect.",
+      "whenToUse": "Use when the user states an issued invoice was raised in error and should no longer stand.",
+      "whenNotToUse": "Do not use to correct a small amount that could be adjusted, and do not use on a draft that can simply be deleted.",
+      "domain": "accounting.invoices",
+      "risk": "FINANCIAL",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "invoiceId"
+        ],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "pattern": "^INV-[0-9]{5}$",
+            "nonPlaceholder": true
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          }
+        }
+      },
+      "outputSummary": "The invoice identifier, its void status, the reversed amount in cents and the reversal entry.",
+      "requiredPermissions": [
+        "accounting.write",
+        "accounting.financial"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Reverses the posted ledger effect and marks the invoice void."
+      ],
+      "relatedCapabilities": [
+        "invoice.lookup",
+        "invoice.issue",
+        "journal.propose"
+      ],
+      "tags": [
+        "invoice",
+        "void",
+        "cancel",
+        "reverse",
+        "error"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "invoice.void"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.invoice.void"
+      ]
+    },
+    {
+      "id": "payment.record",
+      "version": 1,
+      "description": "Record a payment received against an issued invoice, reducing its outstanding amount.",
+      "whenToUse": "Use when the user states a payment was received and names the invoice it settles.",
+      "whenNotToUse": "Do not use against a draft invoice, and do not use when the amount is unknown or the invoice is unidentified.",
+      "domain": "accounting.payments",
+      "risk": "FINANCIAL",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "invoiceId",
+          "amountCents"
+        ],
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "pattern": "^INV-[0-9]{5}$",
+            "nonPlaceholder": true
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000000
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "bank_transfer",
+              "card",
+              "cash",
+              "direct_debit"
+            ]
+          }
+        }
+      },
+      "outputSummary": "The new payment identifier, the invoice it was applied to, the amount in cents and the new outstanding balance.",
+      "requiredPermissions": [
+        "accounting.write",
+        "accounting.financial"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Posts a payment entry against the invoice and changes its outstanding amount."
+      ],
+      "relatedCapabilities": [
+        "payment.lookup",
+        "invoice.preview",
+        "payment.reverse"
+      ],
+      "tags": [
+        "payment",
+        "receipt",
+        "record",
+        "settle",
+        "apply"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "payment.record"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.payment.record"
+      ]
+    },
+    {
+      "id": "payment.lookup",
+      "version": 1,
+      "description": "Read one payment by identifier: the invoice it settled, amount, method and status.",
+      "whenToUse": "Use when the user names a payment identifier and wants to know what it settled.",
+      "whenNotToUse": "Do not use to record or reverse a payment, and do not use when no payment identifier is available.",
+      "domain": "accounting.payments",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paymentId"
+        ],
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^PAY-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The payment identifier, the settled invoice, the amount in cents, method and status.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no payment data changes."
+      ],
+      "relatedCapabilities": [
+        "payment.record",
+        "payment.reverse",
+        "invoice.lookup"
+      ],
+      "tags": [
+        "payment",
+        "read",
+        "lookup",
+        "settled",
+        "invoice"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "payment.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.payment.lookup"
+      ]
+    },
+    {
+      "id": "payment.reverse",
+      "version": 1,
+      "description": "Reverse a recorded payment, restoring the outstanding amount on its invoice.",
+      "whenToUse": "Use when the user states a payment did not clear or was applied to the wrong invoice.",
+      "whenNotToUse": "Do not use to correct an amount that could be re-recorded, and do not use without the payment identifier.",
+      "domain": "accounting.payments",
+      "risk": "FINANCIAL",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paymentId"
+        ],
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^PAY-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          }
+        }
+      },
+      "outputSummary": "The payment identifier, its reversed status and the restored outstanding amount in cents.",
+      "requiredPermissions": [
+        "accounting.write",
+        "accounting.financial"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Posts a reversal entry and restores the invoice outstanding amount."
+      ],
+      "relatedCapabilities": [
+        "payment.lookup",
+        "payment.record",
+        "journal.propose"
+      ],
+      "tags": [
+        "payment",
+        "reverse",
+        "undo",
+        "returned",
+        "restore"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "payment.reverse"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.payment.reverse"
+      ]
+    },
+    {
+      "id": "ledger.query",
+      "version": 1,
+      "description": "Read ledger entries for one account, optionally bounded to a period.",
+      "whenToUse": "Use when the user asks what has been posted to a named ledger account.",
+      "whenNotToUse": "Do not use to propose or post entries, and do not use to read the whole chart of accounts at once.",
+      "domain": "accounting.ledger",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "account"
+        ],
+        "properties": {
+          "account": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          },
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The account, the period covered and a bounded list of entries with debit and credit amounts in cents.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no ledger data changes."
+      ],
+      "relatedCapabilities": [
+        "ledger.trial_balance_read",
+        "journal.propose"
+      ],
+      "tags": [
+        "ledger",
+        "account",
+        "query",
+        "entries",
+        "posted"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "ledger.query"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.ledger.query",
+        "route.ledger.entry.list"
+      ]
+    },
+    {
+      "id": "ledger.trial_balance_read",
+      "version": 1,
+      "description": "Read the trial balance for one period: every account with its debit and credit totals.",
+      "whenToUse": "Use when the user asks for a period overview of all accounts rather than one account.",
+      "whenNotToUse": "Do not use to read a single account in detail, and do not use to post any entry.",
+      "domain": "accounting.ledger",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "period"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The period and a bounded list of accounts with debit and credit totals in cents.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no ledger data changes."
+      ],
+      "relatedCapabilities": [
+        "ledger.query",
+        "journal.propose",
+        "report.generate"
+      ],
+      "tags": [
+        "ledger",
+        "trial",
+        "balance",
+        "period",
+        "overview"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "ledger.trial_balance_read"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.ledger.trial_balance"
+      ]
+    },
+    {
+      "id": "journal.propose",
+      "version": 1,
+      "description": "Propose a two-sided journal entry for review. A proposal is not posted.",
+      "whenToUse": "Use when the user asks for a correcting or adjusting entry and the two accounts and amount are known.",
+      "whenNotToUse": "Do not use to post an entry, and do not use when the two accounts or the amount are unspecified.",
+      "domain": "accounting.journal",
+      "risk": "DRAFT",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "debitAccount",
+          "creditAccount",
+          "amountCents"
+        ],
+        "properties": {
+          "debitAccount": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          },
+          "creditAccount": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000000
+          },
+          "memo": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          }
+        }
+      },
+      "outputSummary": "The new journal identifier, the debit and credit accounts, the amount in cents and the proposed status.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Creates a journal proposal record with no posted financial effect."
+      ],
+      "relatedCapabilities": [
+        "ledger.query",
+        "journal.post",
+        "journal.reverse"
+      ],
+      "tags": [
+        "journal",
+        "entry",
+        "propose",
+        "draft",
+        "adjust",
+        "correct"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "journal.propose"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.journal.propose"
+      ]
+    },
+    {
+      "id": "journal.post",
+      "version": 1,
+      "description": "Post an approved journal proposal, changing posted ledger balances.",
+      "whenToUse": "Use when the user explicitly asks to post a journal that exists and has been approved.",
+      "whenNotToUse": "Do not use on a proposal that is still being drafted, and do not use to create an entry the user did not approve.",
+      "domain": "accounting.journal",
+      "risk": "FINANCIAL",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "journalId"
+        ],
+        "properties": {
+          "journalId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^JNL-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The journal identifier, its posted status and the ledger entries created.",
+      "requiredPermissions": [
+        "accounting.write",
+        "accounting.financial"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Posts both sides of the entry and changes ledger balances."
+      ],
+      "relatedCapabilities": [
+        "journal.propose",
+        "journal.reverse",
+        "ledger.query"
+      ],
+      "tags": [
+        "journal",
+        "post",
+        "approve",
+        "ledger",
+        "commit"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "journal.post"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.journal.post"
+      ]
+    },
+    {
+      "id": "journal.reverse",
+      "version": 1,
+      "description": "Reverse a posted journal entry, restoring the affected ledger balances.",
+      "whenToUse": "Use when the user states a posted entry was wrong and must be undone.",
+      "whenNotToUse": "Do not use on a proposal that was never posted, and do not use to edit the original entry.",
+      "domain": "accounting.journal",
+      "risk": "FINANCIAL",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "journalId"
+        ],
+        "properties": {
+          "journalId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^JNL-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          }
+        }
+      },
+      "outputSummary": "The journal identifier, its reversed status and the reversing entry created.",
+      "requiredPermissions": [
+        "accounting.write",
+        "accounting.financial"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Posts a reversing entry and restores the affected ledger balances."
+      ],
+      "relatedCapabilities": [
+        "journal.post",
+        "journal.propose",
+        "ledger.query"
+      ],
+      "tags": [
+        "journal",
+        "reverse",
+        "undo",
+        "restore",
+        "correction"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "journal.reverse"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.journal.reverse"
+      ]
+    },
+    {
+      "id": "tax.config_read",
+      "version": 1,
+      "description": "Read the synthetic configuration record for one jurisdiction; it holds illustrative settings only.",
+      "whenToUse": "Use when the user asks which jurisdiction a document will be prepared under.",
+      "whenNotToUse": "Do not use to answer a statutory question, and do not use to change any configuration value.",
+      "domain": "accounting.tax",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "jurisdiction"
+        ],
+        "properties": {
+          "jurisdiction": {
+            "type": "string",
+            "enum": [
+              "NZ",
+              "AU",
+              "US",
+              "UK"
+            ],
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The jurisdiction code, the labels it maps to and the configuration record version.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no configuration changes."
+      ],
+      "relatedCapabilities": [
+        "ledger.trial_balance_read",
+        "report.generate"
+      ],
+      "tags": [
+        "tax",
+        "jurisdiction",
+        "config",
+        "read",
+        "settings"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "tax.config_read"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.tax.code.list",
+        "route.tax.code.get"
+      ]
+    },
+    {
+      "id": "tax.period_read",
+      "version": 1,
+      "description": "Read the synthetic period summary for one jurisdiction; it reports recorded totals only.",
+      "whenToUse": "Use when the user asks which period totals are recorded for a jurisdiction.",
+      "whenNotToUse": "Do not use to compute any statutory amount, and do not use to change a recorded total.",
+      "domain": "accounting.tax",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "jurisdiction",
+          "period"
+        ],
+        "properties": {
+          "jurisdiction": {
+            "type": "string",
+            "enum": [
+              "NZ",
+              "AU",
+              "US",
+              "UK"
+            ],
+            "nonPlaceholder": true
+          },
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The jurisdiction, the period and the recorded totals in cents as stored.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no data changes."
+      ],
+      "relatedCapabilities": [
+        "tax.config_read",
+        "ledger.trial_balance_read"
+      ],
+      "tags": [
+        "tax",
+        "period",
+        "summary",
+        "read",
+        "recorded"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "tax.period_read"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.tax.period.get"
+      ]
+    },
+    {
+      "id": "payroll.preview",
+      "version": 1,
+      "description": "Preview a payroll run before it is approved: the employees included and their gross totals.",
+      "whenToUse": "Use when the user wants to see what a pending payroll run would include before approving it.",
+      "whenNotToUse": "Do not use to run payroll, and do not use as evidence that a run was approved.",
+      "domain": "payroll.runs",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "period"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          },
+          "team": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          }
+        }
+      },
+      "outputSummary": "The period, the employees included and their gross totals in cents; nothing is committed.",
+      "requiredPermissions": [
+        "payroll.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no payroll data changes."
+      ],
+      "relatedCapabilities": [
+        "payroll.run",
+        "timesheet.query",
+        "payroll.payslip_read"
+      ],
+      "tags": [
+        "payroll",
+        "preview",
+        "run",
+        "employees",
+        "pending"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "payroll.preview"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.payroll.preview"
+      ]
+    },
+    {
+      "id": "payroll.run",
+      "version": 1,
+      "description": "Approve and commit a payroll run for one period, creating payments for the employees included.",
+      "whenToUse": "Use only when the user explicitly asks to run payroll and has already seen the preview.",
+      "whenNotToUse": "Do not use to preview a run, and do not use when the included employees have not been confirmed.",
+      "domain": "payroll.runs",
+      "risk": "FINANCIAL",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "period"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          },
+          "team": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          }
+        }
+      },
+      "outputSummary": "The payroll run identifier, the period, the employee count and the committed gross total in cents.",
+      "requiredPermissions": [
+        "payroll.write",
+        "accounting.financial"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Commits the payroll run and creates payment entries for each included employee."
+      ],
+      "relatedCapabilities": [
+        "payroll.preview",
+        "timesheet.approve",
+        "payroll.payslip_read"
+      ],
+      "tags": [
+        "payroll",
+        "run",
+        "commit",
+        "approve",
+        "period"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "payroll.run"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.payroll.run"
+      ]
+    },
+    {
+      "id": "payroll.payslip_read",
+      "version": 1,
+      "description": "Read the stored payslip summary for one employee and period.",
+      "whenToUse": "Use when the user asks what an employee was paid for a period that has already been committed.",
+      "whenNotToUse": "Do not use for a period that has not been run, and do not use to change a stored payslip.",
+      "domain": "payroll.runs",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "employeeId",
+          "period"
+        ],
+        "properties": {
+          "employeeId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^EMP-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The employee identifier, the period and the stored gross and net totals in cents.",
+      "requiredPermissions": [
+        "payroll.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no payroll data changes."
+      ],
+      "relatedCapabilities": [
+        "payroll.preview",
+        "timesheet.query"
+      ],
+      "tags": [
+        "payroll",
+        "payslip",
+        "read",
+        "employee",
+        "period"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "payroll.payslip_read"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.payroll.payslip.get"
+      ]
+    },
+    {
+      "id": "timesheet.query",
+      "version": 1,
+      "description": "Read the timesheets recorded for one employee, optionally bounded to a period.",
+      "whenToUse": "Use when the user asks which hours an employee has recorded for review or approval.",
+      "whenNotToUse": "Do not use to approve or submit hours, and do not use to read another employee when an identifier is known.",
+      "domain": "payroll.timesheets",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "employeeId"
+        ],
+        "properties": {
+          "employeeId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^EMP-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The employee identifier and a bounded list of timesheets with week ending, hours and status.",
+      "requiredPermissions": [
+        "payroll.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no timesheet data changes."
+      ],
+      "relatedCapabilities": [
+        "timesheet.approve",
+        "timesheet.submit",
+        "payroll.preview"
+      ],
+      "tags": [
+        "timesheet",
+        "hours",
+        "query",
+        "employee",
+        "read"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "timesheet.query"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.timesheet.list",
+        "route.timesheet.get"
+      ]
+    },
+    {
+      "id": "timesheet.approve",
+      "version": 1,
+      "description": "Approve a submitted timesheet so its hours can be included in a payroll run.",
+      "whenToUse": "Use when the user asks to approve a timesheet that is submitted and the hours have been checked.",
+      "whenNotToUse": "Do not use on a timesheet that is still a draft, and do not use to change the hours being approved.",
+      "domain": "payroll.timesheets",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "timesheetId"
+        ],
+        "properties": {
+          "timesheetId": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 7,
+            "pattern": "^TS-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The timesheet identifier, its approved status, the approved hours and the approver identity.",
+      "requiredPermissions": [
+        "payroll.write"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Changes timesheet status to approved and locks the recorded hours."
+      ],
+      "relatedCapabilities": [
+        "timesheet.query",
+        "timesheet.submit",
+        "payroll.run"
+      ],
+      "tags": [
+        "timesheet",
+        "approve",
+        "hours",
+        "lock",
+        "review"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "timesheet.approve"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.timesheet.approve"
+      ]
+    },
+    {
+      "id": "timesheet.submit",
+      "version": 1,
+      "description": "Submit a draft timesheet for approval, optionally adjusting the recorded hours first.",
+      "whenToUse": "Use when the user asks for recorded hours to be sent for approval.",
+      "whenNotToUse": "Do not use to approve hours, and do not use when the hours differ from what the user stated.",
+      "domain": "payroll.timesheets",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "timesheetId"
+        ],
+        "properties": {
+          "timesheetId": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 7,
+            "pattern": "^TS-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "hours": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 80
+          }
+        }
+      },
+      "outputSummary": "The timesheet identifier, its submitted status and the submitted hours.",
+      "requiredPermissions": [
+        "payroll.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Changes timesheet status to submitted and freezes the recorded hours."
+      ],
+      "relatedCapabilities": [
+        "timesheet.query",
+        "timesheet.approve"
+      ],
+      "tags": [
+        "timesheet",
+        "submit",
+        "hours",
+        "send",
+        "approval"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "timesheet.submit"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.timesheet.submit"
+      ]
+    },
+    {
+      "id": "roster.query",
+      "version": 1,
+      "description": "Read the roster for one week: who is scheduled, and on which days.",
+      "whenToUse": "Use when the user asks who is working in a given week before publishing or planning.",
+      "whenNotToUse": "Do not use to change the roster, and do not use for a week that has not been planned.",
+      "domain": "payroll.roster",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "weekStart"
+        ],
+        "properties": {
+          "weekStart": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The week beginning date and a bounded list of scheduled employees with their days.",
+      "requiredPermissions": [
+        "payroll.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no roster data changes."
+      ],
+      "relatedCapabilities": [
+        "roster.publish",
+        "timesheet.query"
+      ],
+      "tags": [
+        "roster",
+        "schedule",
+        "week",
+        "query",
+        "who"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "roster.query"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.roster.list"
+      ]
+    },
+    {
+      "id": "roster.publish",
+      "version": 1,
+      "description": "Publish the prepared roster for one week so the scheduled employees can see it.",
+      "whenToUse": "Use when the user asks to publish a roster that has been prepared for a specific week.",
+      "whenNotToUse": "Do not use to change who is scheduled, and do not use before the week has been prepared.",
+      "domain": "payroll.roster",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "weekStart"
+        ],
+        "properties": {
+          "weekStart": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The week beginning date, the published status and the employee count in the published roster.",
+      "requiredPermissions": [
+        "payroll.write"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Publishes the roster and notifies the scheduled employees."
+      ],
+      "relatedCapabilities": [
+        "roster.query",
+        "timesheet.query"
+      ],
+      "tags": [
+        "roster",
+        "publish",
+        "schedule",
+        "week",
+        "notify"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "roster.publish"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.roster.publish"
+      ]
+    },
+    {
+      "id": "inventory.lookup",
+      "version": 1,
+      "description": "Read the current stock level for one item, with its unit and reorder point.",
+      "whenToUse": "Use when the user asks how many of an item are on hand in the store.",
+      "whenNotToUse": "Do not use to change stock, and do not use when the user asked for a product description instead.",
+      "domain": "inventory.stock",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sku"
+        ],
+        "properties": {
+          "sku": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^STK-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The stock identifier, item name, quantity on hand, unit and reorder point.",
+      "requiredPermissions": [
+        "inventory.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no stock data changes."
+      ],
+      "relatedCapabilities": [
+        "inventory.adjust",
+        "inventory.receive",
+        "product.lookup"
+      ],
+      "tags": [
+        "stock",
+        "inventory",
+        "level",
+        "onhand",
+        "lookup"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "inventory.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.inventory.lookup",
+        "route.inventory.item.get"
+      ]
+    },
+    {
+      "id": "inventory.adjust",
+      "version": 1,
+      "description": "Adjust the quantity on hand for one stock item by a signed amount, with a recorded reason.",
+      "whenToUse": "Use when the user states stock is missing, damaged or counted differently from the system.",
+      "whenNotToUse": "Do not use to receive a supplier delivery, and do not use without a reason the user stated.",
+      "domain": "inventory.stock",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stockId",
+          "delta",
+          "reason"
+        ],
+        "properties": {
+          "stockId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^STK-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "delta": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 1000
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "breakage",
+              "shrinkage",
+              "count_correction",
+              "damaged_goods",
+              "customer_return"
+            ]
+          }
+        }
+      },
+      "outputSummary": "The stock identifier, the previous and new quantity on hand, and the recorded reason.",
+      "requiredPermissions": [
+        "inventory.read",
+        "inventory.write"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Changes the quantity on hand and records an adjustment entry."
+      ],
+      "relatedCapabilities": [
+        "inventory.lookup",
+        "inventory.receive",
+        "report.generate"
+      ],
+      "tags": [
+        "stock",
+        "inventory",
+        "adjust",
+        "shrinkage",
+        "damage",
+        "count"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "inventory.adjust"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.inventory.adjust"
+      ]
+    },
+    {
+      "id": "inventory.receive",
+      "version": 1,
+      "description": "Receive a supplier delivery into stock, increasing the quantity on hand.",
+      "whenToUse": "Use when the user states goods have arrived and names the stock item and quantity.",
+      "whenNotToUse": "Do not use to correct a count error, and do not use when the received quantity is unknown.",
+      "domain": "inventory.stock",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stockId",
+          "quantity"
+        ],
+        "properties": {
+          "stockId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^STK-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          }
+        }
+      },
+      "outputSummary": "The stock identifier, the received quantity and the new quantity on hand.",
+      "requiredPermissions": [
+        "inventory.read",
+        "inventory.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Increases the quantity on hand and records a receipt entry."
+      ],
+      "relatedCapabilities": [
+        "inventory.lookup",
+        "inventory.adjust",
+        "supplier.lookup"
+      ],
+      "tags": [
+        "stock",
+        "inventory",
+        "receive",
+        "delivery",
+        "supplier"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "inventory.receive"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.inventory.item.update"
+      ]
+    },
+    {
+      "id": "product.lookup",
+      "version": 1,
+      "description": "Search the product catalog by name fragment and return matching items with their prices.",
+      "whenToUse": "Use when the user names a product but no catalog identifier is known.",
+      "whenNotToUse": "Do not use to read stock levels, and do not use to create or change a catalog item.",
+      "domain": "inventory.catalog",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80,
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The match count and a bounded list of catalog items with identifier, name and price in cents.",
+      "requiredPermissions": [
+        "inventory.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no catalog data changes."
+      ],
+      "relatedCapabilities": [
+        "inventory.lookup",
+        "product.create"
+      ],
+      "tags": [
+        "product",
+        "catalog",
+        "search",
+        "item",
+        "find",
+        "price"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "product.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.product.lookup",
+        "route.product.get"
+      ]
+    },
+    {
+      "id": "product.create",
+      "version": 1,
+      "description": "Create a catalog item from a name and a unit price in cents.",
+      "whenToUse": "Use when the user asks for a new catalog item that is not already in the catalog.",
+      "whenNotToUse": "Do not use when a similar item may already exist, and do not use to change the price of an existing item.",
+      "domain": "inventory.catalog",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "priceCents"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120,
+            "nonPlaceholder": true
+          },
+          "priceCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000000
+          }
+        }
+      },
+      "outputSummary": "The new catalog identifier, the stored name and the unit price in cents.",
+      "requiredPermissions": [
+        "inventory.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Creates a persistent catalog item."
+      ],
+      "relatedCapabilities": [
+        "product.lookup",
+        "inventory.receive"
+      ],
+      "tags": [
+        "product",
+        "catalog",
+        "create",
+        "new",
+        "item",
+        "price"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "product.create"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.product.create"
+      ]
+    },
+    {
+      "id": "pos.barcode_scan",
+      "version": 1,
+      "description": "Resolve a scanned barcode to a catalog item and return the item details and price.",
+      "whenToUse": "Use when the user presents a barcode to scan at the point of sale or in the store.",
+      "whenNotToUse": "Do not use to change stock, and do not use when the digits were not provided by the user or a scan.",
+      "domain": "inventory.pos",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "barcode"
+        ],
+        "properties": {
+          "barcode": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 14,
+            "pattern": "^[0-9]{8,14}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The resolved catalog identifier, item name, unit price in cents and current stock level.",
+      "requiredPermissions": [
+        "inventory.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no stock or catalog data changes."
+      ],
+      "relatedCapabilities": [
+        "inventory.lookup",
+        "pos.receipt_read",
+        "product.lookup"
+      ],
+      "tags": [
+        "barcode",
+        "scan",
+        "pos",
+        "till",
+        "item",
+        "lookup"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "pos.barcode_scan"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.barcode.scan",
+        "route.barcode.lookup"
+      ]
+    },
+    {
+      "id": "pos.receipt_read",
+      "version": 1,
+      "description": "Read one point-of-sale receipt: the items sold, totals and payment method recorded.",
+      "whenToUse": "Use when the user names a receipt identifier and wants to know what it recorded.",
+      "whenNotToUse": "Do not use to record a sale or a refund, and do not use when no receipt identifier is available.",
+      "domain": "inventory.pos",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "receiptId"
+        ],
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "pattern": "^RCP-[0-9]{5}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The receipt identifier, the items sold, the total in cents and the recorded payment method.",
+      "requiredPermissions": [
+        "inventory.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no sales data changes."
+      ],
+      "relatedCapabilities": [
+        "pos.barcode_scan",
+        "payment.lookup"
+      ],
+      "tags": [
+        "receipt",
+        "pos",
+        "sale",
+        "read",
+        "items"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "pos.receipt_read"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.pos.sale.get"
+      ]
+    },
+    {
+      "id": "giftcard.lookup",
+      "version": 1,
+      "description": "Read the stored balance and status of one gift card by identifier.",
+      "whenToUse": "Use when the user asks what is left on a gift card that is already identified.",
+      "whenNotToUse": "Do not use to issue or redeem any value, and do not use when no gift card identifier is available.",
+      "domain": "accounting.giftcards",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "giftCardId"
+        ],
+        "properties": {
+          "giftCardId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^GFT-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The gift card identifier, its stored balance in cents and its status.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no gift card data changes."
+      ],
+      "relatedCapabilities": [
+        "giftcard.issue",
+        "loyalty.lookup",
+        "customer.lookup"
+      ],
+      "tags": [
+        "giftcard",
+        "balance",
+        "lookup",
+        "read",
+        "status"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "giftcard.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.giftcard.lookup",
+        "route.giftcard.balance.get"
+      ]
+    },
+    {
+      "id": "giftcard.issue",
+      "version": 1,
+      "description": "Issue a new gift card against a customer for a stated value.",
+      "whenToUse": "Use when the user asks for a gift card to be created for a customer and states the value.",
+      "whenNotToUse": "Do not use to top up an existing card, and do not use when the value was not stated.",
+      "domain": "accounting.giftcards",
+      "risk": "FINANCIAL",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "customerId",
+          "amountCents"
+        ],
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^CUS-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000000
+          }
+        }
+      },
+      "outputSummary": "The new gift card identifier, the owning customer, the issued value in cents and the expiry label.",
+      "requiredPermissions": [
+        "accounting.write",
+        "accounting.financial"
+      ],
+      "requiresConfirmation": true,
+      "sideEffects": [
+        "Creates a gift card with a stored balance and records a liability entry."
+      ],
+      "relatedCapabilities": [
+        "giftcard.lookup",
+        "customer.lookup",
+        "payment.record"
+      ],
+      "tags": [
+        "giftcard",
+        "issue",
+        "create",
+        "value",
+        "customer"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "giftcard.issue"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "high",
+      "mapsToRoutes": [
+        "route.giftcard.issue"
+      ]
+    },
+    {
+      "id": "loyalty.lookup",
+      "version": 1,
+      "description": "Read the loyalty account for one customer: points balance and recent activity.",
+      "whenToUse": "Use when the user asks how many loyalty points a customer has.",
+      "whenNotToUse": "Do not use to award or redeem points, and do not use to change the account tier.",
+      "domain": "accounting.loyalty",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "customerId"
+        ],
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^CUS-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The customer identifier, the points balance and a bounded list of recent activity.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no loyalty data changes."
+      ],
+      "relatedCapabilities": [
+        "loyalty.award_points",
+        "customer.lookup",
+        "giftcard.lookup"
+      ],
+      "tags": [
+        "loyalty",
+        "points",
+        "balance",
+        "customer",
+        "read"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "loyalty.lookup"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.loyalty.lookup",
+        "route.loyalty.account.get"
+      ]
+    },
+    {
+      "id": "loyalty.award_points",
+      "version": 1,
+      "description": "Add loyalty points to one customer account for a stated reason.",
+      "whenToUse": "Use when the user asks for points to be given to a customer and states how many.",
+      "whenNotToUse": "Do not use to redeem points, and do not use when the number of points was not stated.",
+      "domain": "accounting.loyalty",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "customerId",
+          "points"
+        ],
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^CUS-[0-9]{4}$",
+            "nonPlaceholder": true
+          },
+          "points": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          }
+        }
+      },
+      "outputSummary": "The customer identifier, the awarded points and the new points balance.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Increases the loyalty points balance and records the award."
+      ],
+      "relatedCapabilities": [
+        "loyalty.lookup",
+        "customer.lookup"
+      ],
+      "tags": [
+        "loyalty",
+        "points",
+        "award",
+        "add",
+        "customer"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "loyalty.award_points"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.loyalty.points.award"
+      ]
+    },
+    {
+      "id": "report.generate",
+      "version": 1,
+      "description": "Generate a standard business report for a stated kind and period.",
+      "whenToUse": "Use when the user asks for one of the standard reports to be produced for a period.",
+      "whenNotToUse": "Do not use to export or schedule a report, and do not use for a report kind the user did not name.",
+      "domain": "reporting.reports",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reportKind"
+        ],
+        "properties": {
+          "reportKind": {
+            "type": "string",
+            "enum": [
+              "aged_receivables",
+              "aged_payables",
+              "sales_summary",
+              "profit_and_loss",
+              "customer_statement",
+              "stock_valuation"
+            ],
+            "nonPlaceholder": true
+          },
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The report identifier, its kind, the period covered and the section totals.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Creates a transient report artifact and writes an audit record."
+      ],
+      "relatedCapabilities": [
+        "report.export",
+        "report.schedule",
+        "ledger.query"
+      ],
+      "tags": [
+        "report",
+        "generate",
+        "summary",
+        "period",
+        "standard"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "report.generate"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "low",
+      "mapsToRoutes": [
+        "route.report.generate"
+      ]
+    },
+    {
+      "id": "report.export",
+      "version": 1,
+      "description": "Export a standard report to a file in a stated format.",
+      "whenToUse": "Use when the user asks for a report to be produced as a downloadable file.",
+      "whenNotToUse": "Do not use to schedule a recurring report, and do not use for a format the user did not name.",
+      "domain": "reporting.reports",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reportKind",
+          "format"
+        ],
+        "properties": {
+          "reportKind": {
+            "type": "string",
+            "enum": [
+              "aged_receivables",
+              "aged_payables",
+              "sales_summary",
+              "profit_and_loss",
+              "customer_statement",
+              "stock_valuation"
+            ],
+            "nonPlaceholder": true
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "csv",
+              "pdf",
+              "xlsx"
+            ],
+            "nonPlaceholder": true
+          },
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The export identifier, the report kind, the format and the written file path.",
+      "requiredPermissions": [
+        "accounting.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an export file to the workspace and records an audit entry."
+      ],
+      "relatedCapabilities": [
+        "report.generate",
+        "report.schedule"
+      ],
+      "tags": [
+        "report",
+        "export",
+        "csv",
+        "pdf",
+        "file",
+        "download"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "report.export"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.report.export"
+      ]
+    },
+    {
+      "id": "report.schedule",
+      "version": 1,
+      "description": "Schedule a standard report to be produced repeatedly at a stated cadence.",
+      "whenToUse": "Use when the user asks for a report to be produced automatically on a recurring basis.",
+      "whenNotToUse": "Do not use for a one-off report, and do not use when the cadence was not stated.",
+      "domain": "reporting.reports",
+      "risk": "MUTATION",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reportKind",
+          "cadence"
+        ],
+        "properties": {
+          "reportKind": {
+            "type": "string",
+            "enum": [
+              "aged_receivables",
+              "aged_payables",
+              "sales_summary",
+              "profit_and_loss",
+              "customer_statement",
+              "stock_valuation"
+            ],
+            "nonPlaceholder": true
+          },
+          "cadence": {
+            "type": "string",
+            "enum": [
+              "daily",
+              "weekly",
+              "monthly",
+              "quarterly"
+            ],
+            "nonPlaceholder": true
+          },
+          "recipientEmail": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 120,
+            "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+          }
+        }
+      },
+      "outputSummary": "The schedule identifier, the report kind, the cadence and the next production date.",
+      "requiredPermissions": [
+        "accounting.write"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Creates a recurring report schedule record."
+      ],
+      "relatedCapabilities": [
+        "report.generate",
+        "report.export"
+      ],
+      "tags": [
+        "report",
+        "schedule",
+        "recurring",
+        "cadence",
+        "automatic"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "report.schedule"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "idempotency_key_supported",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.report.schedule.create"
+      ]
+    },
+    {
+      "id": "admin.user_read",
+      "version": 1,
+      "description": "Read the access record for one operator: role, status and last change.",
+      "whenToUse": "Use when the user asks about an operator account that is identified by a user identifier.",
+      "whenNotToUse": "Do not use to change a role or status, and do not use to read another operator when not asked.",
+      "domain": "admin.access",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^USR-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The user identifier, display name, role label, status and last change date.",
+      "requiredPermissions": [
+        "admin.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no access data changes."
+      ],
+      "relatedCapabilities": [
+        "admin.permission_read",
+        "admin.audit_read"
+      ],
+      "tags": [
+        "admin",
+        "user",
+        "account",
+        "read",
+        "role"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "admin.user_read"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.admin.user.list",
+        "route.admin.user.get"
+      ]
+    },
+    {
+      "id": "admin.permission_read",
+      "version": 1,
+      "description": "Read the permission grants recorded for one operator account.",
+      "whenToUse": "Use when the user asks what an operator is allowed to do in the workspace.",
+      "whenNotToUse": "Do not use to grant or revoke a permission, and do not use to change any role assignment.",
+      "domain": "admin.access",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "userId"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 8,
+            "pattern": "^USR-[0-9]{4}$",
+            "nonPlaceholder": true
+          }
+        }
+      },
+      "outputSummary": "The user identifier and the list of recorded permission grants.",
+      "requiredPermissions": [
+        "admin.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; no permission data changes."
+      ],
+      "relatedCapabilities": [
+        "admin.user_read",
+        "admin.audit_read"
+      ],
+      "tags": [
+        "admin",
+        "permission",
+        "grants",
+        "read",
+        "allowed"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "admin.permission_read"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.admin.role.list",
+        "route.admin.role.get",
+        "route.admin.permission.list"
+      ]
+    },
+    {
+      "id": "admin.audit_read",
+      "version": 1,
+      "description": "Read audit records for one period, optionally filtered to a single actor.",
+      "whenToUse": "Use when the user asks what actions were recorded in a period, or who performed a recorded action.",
+      "whenNotToUse": "Do not use to change or delete audit records, and do not use to read records outside the stated period.",
+      "domain": "admin.access",
+      "risk": "READ",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "period"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 10,
+            "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2})?$",
+            "nonPlaceholder": true
+          },
+          "actorId": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 60
+          }
+        }
+      },
+      "outputSummary": "The period and a bounded list of audit records with sequence, actor, action and outcome.",
+      "requiredPermissions": [
+        "admin.read"
+      ],
+      "requiresConfirmation": false,
+      "sideEffects": [
+        "Writes an audit record only; audit content is never modified."
+      ],
+      "relatedCapabilities": [
+        "admin.user_read",
+        "admin.permission_read"
+      ],
+      "tags": [
+        "admin",
+        "audit",
+        "log",
+        "history",
+        "read",
+        "period"
+      ],
+      "adapter": {
+        "kind": "mock",
+        "operation": "admin.audit_read"
+      },
+      "verifier": "sim.ack",
+      "enabled": true,
+      "idempotency": "naturally_idempotent",
+      "sensitivity": "moderate",
+      "mapsToRoutes": [
+        "route.admin.audit.list",
+        "route.admin.audit.get"
+      ]
+    }
+  ]
+}

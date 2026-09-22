@@ -46,6 +46,10 @@ import { resolve } from 'node:path';
  * @param {Record<string, Record<string, unknown>>} [options.capabilityOverrides]  Trusted overrides applied to pack definitions before sealing (used to test revocation and version drift).
  * @param {((config: any) => void)} [options.mutateConfig]          Test/benchmark-only configuration override.
  * @param {any} [options.mockAdapter]                               Adapter injection point (tests prove that a lying adapter cannot produce a verified result).
+ * @param {'full'|'minimal'} [options.promptMode]                   Live-experiment control: 'minimal' omits contract/SOP guidance (Arm C). Authority is unaffected.
+ * @param {'none'|'accountants-way'} [options.doctrine]             Inject the compact accounting doctrine (The Accountant's Way). Model-facing only; authority is unaffected.
+ * @param {any} [options.provider]                                  Provider injection: lets a live benchmark reuse one spawned engine across many harnesses.
+ * @param {boolean} [options.includeDefaultPack]                     Set false to register only the supplied capability pack (scale simulation).
  * @param {Record<string, (input: any) => { checks: Array<{ check: string, ok: boolean, detail?: string }> }>} [options.extraVerifiers]  Additional verifiers for injected capabilities (tests, benchmark arms).
  */
 export async function createHarnessFromConfig(options = {}) {
@@ -62,9 +66,11 @@ export async function createHarnessFromConfig(options = {}) {
   const store = createSyntheticAccountingStore();
   const registry = createRegistry();
   const overrides = options.capabilityOverrides ?? {};
-  for (const definition of syntheticAccountingCapabilities()) {
-    const override = overrides[String(definition.id)];
-    registry.register(override ? { ...definition, ...override } : definition);
+  if (options.includeDefaultPack !== false) {
+    for (const definition of syntheticAccountingCapabilities()) {
+      const override = overrides[String(definition.id)];
+      registry.register(override ? { ...definition, ...override } : definition);
+    }
   }
   for (const definition of options.extraCapabilities ?? []) registry.register(definition);
   registry.seal();
@@ -143,13 +149,14 @@ export async function createHarnessFromConfig(options = {}) {
   const policy = createPolicyEngine({ config, registry, adapters: { mock: mockAdapter, http: httpAdapter } });
 
   // ---- provider + SOP -------------------------------------------------------
-  const provider = createProvider(config.provider, {
+  const provider = options.provider ?? createProvider(config.provider, {
     ...(options.script ? { script: options.script } : {}),
     ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {})
   });
   const sop = loadSop(
     resolve(loaded.rootDir, 'prompts/accounting-resident.sop.md'),
-    resolve(loaded.rootDir, 'prompts/resident-base-contract.md')
+    resolve(loaded.rootDir, 'prompts/resident-base-contract.md'),
+    ...(options.doctrine === 'accountants-way' ? [resolve(loaded.rootDir, 'prompts/accountants-way.compact.md')] : [])
   );
 
   const harness = createHarness({
@@ -167,7 +174,8 @@ export async function createHarnessFromConfig(options = {}) {
     sop,
     sessionId,
     clock,
-    includeContextText: options.includeContextText ?? config.evidence.includeContextText === true
+    includeContextText: options.includeContextText ?? config.evidence.includeContextText === true,
+    ...(options.promptMode ? { promptMode: options.promptMode } : {})
   });
 
   return {

@@ -1,8 +1,8 @@
 # Benchmark — Sovereign Action Harness v0.1
 
 What `benchmarks/run-benchmark.mjs` measures, how each metric is computed, and what a report must
-never claim. Newest report: `benchmarks/results/2026-09-21T14-43-17-730Z-bounded/report.json`
-(`node benchmarks/run-benchmark.mjs --arm bounded`): 36/36 cases passing, 0 unauthorised executions.
+never claim. Newest report: `benchmarks/results/2026-09-22T19-26-43-218Z-bounded/report.json`
+(`node benchmarks/run-benchmark.mjs --arm bounded`): 37/37 cases passing, 0 unauthorised executions.
 
 ## What the benchmark measures
 
@@ -117,10 +117,10 @@ in `benchmarks/run-benchmark.mjs`:
   `textChars` = context text length, `approxTokens` = `ceil(textChars / 4)`
   (`src/registry/context.mjs:137-159`, `src/core/util.mjs:92-94`).
 
-Newest report figures: expectations 161/161 met; parseSuccess 33/53; correctCapability 24/24; argumentValidity 7/7;
-clarificationDetected 3/3; hallucinatedCapabilityRejected 2/2; verificationResult 21/21; endToEndCompletion 36/36; unauthorised
-executions 0; latency p50 6 ms, p90 13 ms, p99 516 ms, max 516 ms, mean 40.79 ms (warm-up 16 ms excluded, 52 turns);
-context mean 8.07 capabilities (7-9), mean 7491 text chars, mean 1873.23 approximate tokens (max 2059), total schema bytes 125373.
+Newest report figures: expectations 169/169 met; parseSuccess 34/55; correctCapability 26/26; argumentValidity 8/8;
+clarificationDetected 3/3; hallucinatedCapabilityRejected 2/2; verificationResult 22/22; endToEndCompletion 37/37; unauthorised
+executions 0; latency p50 3 ms, p90 7 ms, p99 427 ms, max 427 ms, mean 27.3 ms (warm-up 11 ms excluded, 54 turns);
+context mean 8.07 capabilities (7-9), mean 7489.89 text chars, mean 1872.95 approximate tokens (max 2059), total schema bytes 128275.
 
 ## Recorded fields for a defensible comparison
 
@@ -198,3 +198,25 @@ and counts it in `metrics.failuresByClassification`. No model judges a failure (
 is the default when a failing turn carries no authored class. Only failures that repeat and are proven
 to be genuine model behaviour may later become training data; no fine-tuning happens during v0.1, and
 the fixtures themselves are never training data (R-47).
+
+## Scale simulation (Phase 16)
+
+A **separate benchmark** from the fixture benchmark above and from the live-model benchmark
+(`benchmarks/run-live-benchmark.mjs`); it is not an arm of either, and no figure from it may be
+combined with, or cited as, a result of another benchmark.
+
+- **What it measures:** deterministic tool-surface sizes for four surfaces (raw, documented,
+  semantic, bounded) against a 4096-token window with no inference, and real model runs under the
+  same harness safety boundary on a synthetic 394-route workload. Definition:
+  `docs/SCALE_SIMULATION.md`; results: `docs/SCALE_SIMULATION_RESULTS.md`.
+- **Reports:** `benchmarks/results/scale/` — `surface-measurements.json` plus one JSON per live arm
+  (`<surface>-<timestamp>.json`), never in the fixture (`benchmarks/results/<timestamp>-<arm>/`) or
+  live (`benchmarks/results/live/`) directories.
+- **Two truths, never mixed:** fixture numbers measure the harness's controls under a scripted
+  provider and say nothing about model quality; live-benchmark numbers measure this model on the
+  fixture task set; scale-simulation numbers measure this model on the synthetic workload. No
+  cross-benchmark per-arm comparison is valid.
+- **Soundness caveats (identical to the results doc):** repetitions = 1; the bounded arm's filter
+  uses ground-truth task metadata (an upper bound on a discovery signal); the corpus/records are
+  synthetic; no jurisdiction rules exist; the pilot is small (8 and 2 task-runs); local inference is
+  not bit-reproducible.

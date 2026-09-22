@@ -1,0 +1,2074 @@
+{
+  "$schemaNote": "SCALE-FAITHFUL / BEHAVIOR-SYNTHETIC / NOT A REPLICA of any external system. No real accounting, tax or payroll rules exist here.",
+  "generatedBy": "simulation/generate-topology.mjs",
+  "counts": {
+    "total": 176,
+    "byGroup": {
+      "Dashboard/Home": 8,
+      "Customers/Suppliers": 20,
+      "Quotes/Invoices": 28,
+      "Ledger/Payments": 20,
+      "Payroll/Rosters/Timesheets": 24,
+      "Inventory/POS/Barcode": 28,
+      "Tax": 16,
+      "Gift/Loyalty": 10,
+      "Reporting": 12,
+      "Admin/Security/Config": 10
+    }
+  },
+  "screens": [
+    {
+      "id": "home.overview",
+      "title": "Workspace overview",
+      "domain": "home",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "platform.home"
+      ]
+    },
+    {
+      "id": "home.today",
+      "title": "Today",
+      "domain": "home",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "platform.home",
+        "accounting.invoices",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "home.tasks",
+      "title": "Task queue",
+      "domain": "home",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "platform.home"
+      ]
+    },
+    {
+      "id": "home.approvals",
+      "title": "Approval queue",
+      "domain": "home",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "platform.home",
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "home.recent_activity",
+      "title": "Recent activity",
+      "domain": "home",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "platform.audit"
+      ]
+    },
+    {
+      "id": "home.cash_snapshot",
+      "title": "Cash snapshot",
+      "domain": "home",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "accounting.ledger",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "home.alerts",
+      "title": "Alerts",
+      "domain": "home",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "platform.home"
+      ]
+    },
+    {
+      "id": "home.search",
+      "title": "Global search",
+      "domain": "home",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "platform.home"
+      ]
+    },
+    {
+      "id": "customer.list",
+      "title": "Customer list",
+      "domain": "customers",
+      "entityRefs": [
+        "customer"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "customer.detail",
+      "title": "Customer detail",
+      "domain": "customers",
+      "entityRefs": [
+        "customer",
+        "customer_contact",
+        "customer_address",
+        "customer_note"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers",
+        "accounting.invoices",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "customer.create",
+      "title": "New customer",
+      "domain": "customers",
+      "entityRefs": [
+        "customer"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "customer.edit",
+      "title": "Edit customer",
+      "domain": "customers",
+      "entityRefs": [
+        "customer"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "customer.contacts",
+      "title": "Customer contacts",
+      "domain": "customers",
+      "entityRefs": [
+        "customer_contact"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "customer.addresses",
+      "title": "Customer addresses",
+      "domain": "customers",
+      "entityRefs": [
+        "customer_address"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "customer.notes",
+      "title": "Customer notes",
+      "domain": "customers",
+      "entityRefs": [
+        "customer_note"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "customer.statement",
+      "title": "Customer statement",
+      "domain": "customers",
+      "entityRefs": [
+        "customer",
+        "invoice",
+        "payment"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers",
+        "accounting.invoices",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "customer.balance",
+      "title": "Customer balance",
+      "domain": "customers",
+      "entityRefs": [
+        "customer",
+        "invoice"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers",
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "customer.activity",
+      "title": "Customer activity",
+      "domain": "customers",
+      "entityRefs": [
+        "customer"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers",
+        "platform.audit"
+      ]
+    },
+    {
+      "id": "customer.merge",
+      "title": "Merge customers",
+      "domain": "customers",
+      "entityRefs": [
+        "customer",
+        "customer_contact",
+        "customer_address"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "customer.import",
+      "title": "Import customers",
+      "domain": "customers",
+      "entityRefs": [
+        "customer"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "supplier.list",
+      "title": "Supplier list",
+      "domain": "suppliers",
+      "entityRefs": [
+        "supplier"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.suppliers"
+      ]
+    },
+    {
+      "id": "supplier.detail",
+      "title": "Supplier detail",
+      "domain": "suppliers",
+      "entityRefs": [
+        "supplier",
+        "supplier_contact",
+        "supplier_address",
+        "supplier_bank_account"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.suppliers",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "supplier.create",
+      "title": "New supplier",
+      "domain": "suppliers",
+      "entityRefs": [
+        "supplier"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.suppliers"
+      ]
+    },
+    {
+      "id": "supplier.contacts",
+      "title": "Supplier contacts",
+      "domain": "suppliers",
+      "entityRefs": [
+        "supplier_contact"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.suppliers"
+      ]
+    },
+    {
+      "id": "supplier.addresses",
+      "title": "Supplier addresses",
+      "domain": "suppliers",
+      "entityRefs": [
+        "supplier_address"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.suppliers"
+      ]
+    },
+    {
+      "id": "supplier.bank_accounts",
+      "title": "Supplier bank accounts",
+      "domain": "suppliers",
+      "entityRefs": [
+        "supplier_bank_account"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.suppliers",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "supplier.statement",
+      "title": "Supplier statement",
+      "domain": "suppliers",
+      "entityRefs": [
+        "supplier",
+        "payment"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.suppliers",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "supplier.purchase_history",
+      "title": "Supplier purchase history",
+      "domain": "suppliers",
+      "entityRefs": [
+        "supplier",
+        "product"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.suppliers",
+        "stock.products"
+      ]
+    },
+    {
+      "id": "quote.list",
+      "title": "Quote list",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.detail",
+      "title": "Quote detail",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote",
+        "quote_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.create",
+      "title": "New quote",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.edit_draft",
+      "title": "Edit quote draft",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote",
+        "quote_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.lines",
+      "title": "Quote lines",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.preview",
+      "title": "Quote preview",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote",
+        "quote_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.issue",
+      "title": "Issue quote",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.send",
+      "title": "Send quote",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.accept_decline",
+      "title": "Accept or decline quote",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.revisions",
+      "title": "Quote revisions",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote",
+        "quote_revision"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "quote.convert",
+      "title": "Convert quote",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote",
+        "invoice"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes",
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "quote.templates",
+      "title": "Quote templates",
+      "domain": "quotes",
+      "entityRefs": [
+        "quote"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.quotes"
+      ]
+    },
+    {
+      "id": "invoice.list",
+      "title": "Invoice list",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.detail",
+      "title": "Invoice detail",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice",
+        "invoice_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.create",
+      "title": "New invoice",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.edit_draft",
+      "title": "Edit invoice draft",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice",
+        "invoice_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.lines",
+      "title": "Invoice lines",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.preview",
+      "title": "Invoice preview",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice",
+        "invoice_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.issue",
+      "title": "Issue invoice",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.send",
+      "title": "Send invoice",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.delivery",
+      "title": "Invoice delivery history",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice",
+        "invoice_delivery"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.credits",
+      "title": "Credit notes",
+      "domain": "invoices",
+      "entityRefs": [
+        "credit_note",
+        "credit_note_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.payments",
+      "title": "Invoice payments",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice",
+        "payment",
+        "payment_allocation"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "invoice.reminders",
+      "title": "Invoice reminders",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice",
+        "invoice_reminder"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.attachments",
+      "title": "Invoice attachments",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice",
+        "invoice_attachment"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.status_history",
+      "title": "Invoice status history",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices",
+        "platform.audit"
+      ]
+    },
+    {
+      "id": "invoice.recurring",
+      "title": "Recurring invoices",
+      "domain": "invoices",
+      "entityRefs": [
+        "recurring_invoice_schedule"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "invoice.numbering",
+      "title": "Invoice numbering",
+      "domain": "invoices",
+      "entityRefs": [
+        "invoice_number_sequence"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.invoices",
+        "platform.config"
+      ]
+    },
+    {
+      "id": "ledger.accounts",
+      "title": "Chart of accounts",
+      "domain": "ledger",
+      "entityRefs": [
+        "ledger_account"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "ledger.account_detail",
+      "title": "Ledger account detail",
+      "domain": "ledger",
+      "entityRefs": [
+        "ledger_account",
+        "ledger_entry"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "ledger.entries",
+      "title": "Ledger entries",
+      "domain": "ledger",
+      "entityRefs": [
+        "ledger_entry"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "ledger.entry_detail",
+      "title": "Ledger entry detail",
+      "domain": "ledger",
+      "entityRefs": [
+        "ledger_entry"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "ledger.query",
+      "title": "Ledger query",
+      "domain": "ledger",
+      "entityRefs": [
+        "ledger_entry"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "journal.list",
+      "title": "Journal list",
+      "domain": "ledger",
+      "entityRefs": [
+        "journal"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "journal.detail",
+      "title": "Journal detail",
+      "domain": "ledger",
+      "entityRefs": [
+        "journal",
+        "journal_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "journal.draft",
+      "title": "Journal draft",
+      "domain": "ledger",
+      "entityRefs": [
+        "journal",
+        "journal_line"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "journal.posting",
+      "title": "Journal posting",
+      "domain": "ledger",
+      "entityRefs": [
+        "journal"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "journal.templates",
+      "title": "Journal templates",
+      "domain": "ledger",
+      "entityRefs": [
+        "journal_template"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "ledger.periods",
+      "title": "Ledger periods",
+      "domain": "ledger",
+      "entityRefs": [
+        "journal"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "ledger.trial_balance",
+      "title": "Trial balance",
+      "domain": "ledger",
+      "entityRefs": [
+        "ledger_entry",
+        "ledger_account"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "payment.list",
+      "title": "Payment list",
+      "domain": "payments",
+      "entityRefs": [
+        "payment"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "payment.detail",
+      "title": "Payment detail",
+      "domain": "payments",
+      "entityRefs": [
+        "payment",
+        "payment_allocation"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "payment.record",
+      "title": "Record payment",
+      "domain": "payments",
+      "entityRefs": [
+        "payment"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "payment.apply",
+      "title": "Apply payment",
+      "domain": "payments",
+      "entityRefs": [
+        "payment",
+        "payment_allocation",
+        "invoice"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.payments",
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "payment.batches",
+      "title": "Payment batches",
+      "domain": "payments",
+      "entityRefs": [
+        "payment_batch",
+        "payment_batch_item"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "payment.methods",
+      "title": "Payment methods",
+      "domain": "payments",
+      "entityRefs": [
+        "payment_method"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "payment.deposits",
+      "title": "Bank deposits",
+      "domain": "payments",
+      "entityRefs": [
+        "bank_deposit"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "payment.reconciliation",
+      "title": "Payment reconciliation",
+      "domain": "payments",
+      "entityRefs": [
+        "reconciliation",
+        "ledger_entry"
+      ],
+      "relevantCapabilityDomains": [
+        "accounting.payments",
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "payroll.runs",
+      "title": "Payroll runs",
+      "domain": "payroll",
+      "entityRefs": [
+        "payroll_run"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.run_detail",
+      "title": "Payroll run detail",
+      "domain": "payroll",
+      "entityRefs": [
+        "payroll_run",
+        "payroll_line"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.preview",
+      "title": "Payroll preview",
+      "domain": "payroll",
+      "entityRefs": [
+        "payroll_run"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.approvals",
+      "title": "Payroll approvals",
+      "domain": "payroll",
+      "entityRefs": [
+        "payroll_run"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.payslips",
+      "title": "Payslips",
+      "domain": "payroll",
+      "entityRefs": [
+        "payslip"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.employees",
+      "title": "Employees",
+      "domain": "payroll",
+      "entityRefs": [
+        "employee"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.employee_detail",
+      "title": "Employee detail",
+      "domain": "payroll",
+      "entityRefs": [
+        "employee",
+        "employment_contract",
+        "timesheet"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll",
+        "people.timesheets"
+      ]
+    },
+    {
+      "id": "payroll.contracts",
+      "title": "Employment contracts",
+      "domain": "payroll",
+      "entityRefs": [
+        "employment_contract"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.deductions",
+      "title": "Payroll deductions",
+      "domain": "payroll",
+      "entityRefs": [
+        "employee_deduction"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.allowances",
+      "title": "Payroll allowances",
+      "domain": "payroll",
+      "entityRefs": [
+        "employee_allowance"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "payroll.leave",
+      "title": "Leave requests",
+      "domain": "payroll",
+      "entityRefs": [
+        "leave_request"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll",
+        "people.rosters"
+      ]
+    },
+    {
+      "id": "payroll.cost_allocation",
+      "title": "Payroll cost allocation",
+      "domain": "payroll",
+      "entityRefs": [
+        "payroll_run",
+        "payroll_line"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll",
+        "insight.reporting"
+      ]
+    },
+    {
+      "id": "payroll.bank_files",
+      "title": "Payroll bank files",
+      "domain": "payroll",
+      "entityRefs": [
+        "payroll_run"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "payroll.settings",
+      "title": "Payroll settings",
+      "domain": "payroll",
+      "entityRefs": [
+        "setting"
+      ],
+      "relevantCapabilityDomains": [
+        "people.payroll",
+        "platform.config"
+      ]
+    },
+    {
+      "id": "roster.list",
+      "title": "Roster list",
+      "domain": "rosters",
+      "entityRefs": [
+        "roster"
+      ],
+      "relevantCapabilityDomains": [
+        "people.rosters"
+      ]
+    },
+    {
+      "id": "roster.detail",
+      "title": "Roster detail",
+      "domain": "rosters",
+      "entityRefs": [
+        "roster",
+        "roster_shift"
+      ],
+      "relevantCapabilityDomains": [
+        "people.rosters"
+      ]
+    },
+    {
+      "id": "roster.shifts",
+      "title": "Roster shifts",
+      "domain": "rosters",
+      "entityRefs": [
+        "roster_shift"
+      ],
+      "relevantCapabilityDomains": [
+        "people.rosters"
+      ]
+    },
+    {
+      "id": "roster.coverage",
+      "title": "Roster coverage",
+      "domain": "rosters",
+      "entityRefs": [
+        "roster",
+        "roster_shift",
+        "employee"
+      ],
+      "relevantCapabilityDomains": [
+        "people.rosters",
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "roster.templates",
+      "title": "Roster templates",
+      "domain": "rosters",
+      "entityRefs": [
+        "roster"
+      ],
+      "relevantCapabilityDomains": [
+        "people.rosters"
+      ]
+    },
+    {
+      "id": "roster.publish",
+      "title": "Publish roster",
+      "domain": "rosters",
+      "entityRefs": [
+        "roster"
+      ],
+      "relevantCapabilityDomains": [
+        "people.rosters"
+      ]
+    },
+    {
+      "id": "timesheet.list",
+      "title": "Timesheet list",
+      "domain": "timesheets",
+      "entityRefs": [
+        "timesheet"
+      ],
+      "relevantCapabilityDomains": [
+        "people.timesheets"
+      ]
+    },
+    {
+      "id": "timesheet.detail",
+      "title": "Timesheet detail",
+      "domain": "timesheets",
+      "entityRefs": [
+        "timesheet",
+        "timesheet_line"
+      ],
+      "relevantCapabilityDomains": [
+        "people.timesheets"
+      ]
+    },
+    {
+      "id": "timesheet.approvals",
+      "title": "Timesheet approvals",
+      "domain": "timesheets",
+      "entityRefs": [
+        "timesheet"
+      ],
+      "relevantCapabilityDomains": [
+        "people.timesheets"
+      ]
+    },
+    {
+      "id": "timesheet.my_hours",
+      "title": "My recorded hours",
+      "domain": "timesheets",
+      "entityRefs": [
+        "timesheet",
+        "timesheet_line"
+      ],
+      "relevantCapabilityDomains": [
+        "people.timesheets"
+      ]
+    },
+    {
+      "id": "inventory.list",
+      "title": "Inventory list",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_item"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "inventory.item_detail",
+      "title": "Stock item detail",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_item",
+        "stock_movement"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "inventory.adjust",
+      "title": "Adjust stock",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_item",
+        "stock_movement"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "inventory.transfer",
+      "title": "Transfer stock",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_item",
+        "stock_location",
+        "stock_movement"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "inventory.movements",
+      "title": "Stock movements",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_movement"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "inventory.counts",
+      "title": "Stock counts",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_count",
+        "stock_item"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "inventory.locations",
+      "title": "Stock locations",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_location"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "inventory.valuation",
+      "title": "Inventory valuation",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_item"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory",
+        "insight.reporting"
+      ]
+    },
+    {
+      "id": "inventory.reorder",
+      "title": "Reorder suggestions",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_item",
+        "supplier"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory",
+        "accounting.suppliers"
+      ]
+    },
+    {
+      "id": "inventory.lots",
+      "title": "Stock lots",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_item"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "inventory.serials",
+      "title": "Serial numbers",
+      "domain": "inventory",
+      "entityRefs": [
+        "stock_item"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "product.list",
+      "title": "Product list",
+      "domain": "inventory",
+      "entityRefs": [
+        "product"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.products"
+      ]
+    },
+    {
+      "id": "product.detail",
+      "title": "Product detail",
+      "domain": "inventory",
+      "entityRefs": [
+        "product",
+        "product_variant"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.products"
+      ]
+    },
+    {
+      "id": "product.create",
+      "title": "New product",
+      "domain": "inventory",
+      "entityRefs": [
+        "product"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.products"
+      ]
+    },
+    {
+      "id": "product.variants",
+      "title": "Product variants",
+      "domain": "inventory",
+      "entityRefs": [
+        "product_variant"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.products"
+      ]
+    },
+    {
+      "id": "product.categories",
+      "title": "Product categories",
+      "domain": "inventory",
+      "entityRefs": [
+        "product_category"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.products"
+      ]
+    },
+    {
+      "id": "product.pricing",
+      "title": "Product pricing",
+      "domain": "inventory",
+      "entityRefs": [
+        "product",
+        "product_variant"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.products"
+      ]
+    },
+    {
+      "id": "product.suppliers",
+      "title": "Product suppliers",
+      "domain": "inventory",
+      "entityRefs": [
+        "product",
+        "supplier"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.products",
+        "accounting.suppliers"
+      ]
+    },
+    {
+      "id": "product.media",
+      "title": "Product media",
+      "domain": "inventory",
+      "entityRefs": [
+        "product"
+      ],
+      "relevantCapabilityDomains": [
+        "stock.products"
+      ]
+    },
+    {
+      "id": "pos.sale",
+      "title": "POS sale",
+      "domain": "pos",
+      "entityRefs": [
+        "pos_sale",
+        "pos_sale_line"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.pos"
+      ]
+    },
+    {
+      "id": "pos.sessions",
+      "title": "POS sessions",
+      "domain": "pos",
+      "entityRefs": [
+        "pos_session",
+        "pos_terminal"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.pos"
+      ]
+    },
+    {
+      "id": "pos.terminals",
+      "title": "POS terminals",
+      "domain": "pos",
+      "entityRefs": [
+        "pos_terminal"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.pos"
+      ]
+    },
+    {
+      "id": "pos.cash_up",
+      "title": "POS cash-up",
+      "domain": "pos",
+      "entityRefs": [
+        "pos_session",
+        "pos_sale"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.pos",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "pos.refunds",
+      "title": "POS refunds",
+      "domain": "pos",
+      "entityRefs": [
+        "pos_sale",
+        "payment"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.pos",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "barcode.scan",
+      "title": "Barcode scan",
+      "domain": "barcode",
+      "entityRefs": [
+        "barcode",
+        "stock_item"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.barcode",
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "barcode.labels",
+      "title": "Barcode labels",
+      "domain": "barcode",
+      "entityRefs": [
+        "barcode",
+        "product"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.barcode",
+        "stock.products"
+      ]
+    },
+    {
+      "id": "barcode.generate",
+      "title": "Generate barcodes",
+      "domain": "barcode",
+      "entityRefs": [
+        "barcode"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.barcode"
+      ]
+    },
+    {
+      "id": "pos.receipts",
+      "title": "POS receipts",
+      "domain": "pos",
+      "entityRefs": [
+        "pos_sale"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.pos"
+      ]
+    },
+    {
+      "id": "tax.codes",
+      "title": "Tax codes",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_code"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.treatments",
+      "title": "Tax treatments",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_treatment"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.jurisdictions",
+      "title": "Tax jurisdictions",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_jurisdiction"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.periods",
+      "title": "Tax periods",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_period"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.period_detail",
+      "title": "Tax period detail",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_period",
+        "tax_return"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.return_prepare",
+      "title": "Prepare tax return",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_return"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.return_detail",
+      "title": "Tax return detail",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_return",
+        "tax_return_line"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.return_preview",
+      "title": "Tax return preview",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_return",
+        "tax_return_line"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.calculation",
+      "title": "Tax calculation",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_calculation_trace",
+        "tax_treatment"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.exemptions",
+      "title": "Tax exemptions",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_exemption",
+        "customer"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config",
+        "accounting.customers"
+      ]
+    },
+    {
+      "id": "tax.settings",
+      "title": "Tax settings",
+      "domain": "tax",
+      "entityRefs": [
+        "setting"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config",
+        "platform.config"
+      ]
+    },
+    {
+      "id": "tax.invoice_tax",
+      "title": "Invoice tax review",
+      "domain": "tax",
+      "entityRefs": [
+        "invoice",
+        "invoice_line"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config",
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "tax.ledger_tax",
+      "title": "Ledger tax review",
+      "domain": "tax",
+      "entityRefs": [
+        "ledger_entry",
+        "ledger_account"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config",
+        "accounting.ledger"
+      ]
+    },
+    {
+      "id": "tax.period_close",
+      "title": "Close tax period",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_period"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.traces",
+      "title": "Tax calculation traces",
+      "domain": "tax",
+      "entityRefs": [
+        "tax_calculation_trace"
+      ],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "tax.overview",
+      "title": "Tax overview",
+      "domain": "tax",
+      "entityRefs": [],
+      "relevantCapabilityDomains": [
+        "tax.config"
+      ]
+    },
+    {
+      "id": "giftcard.list",
+      "title": "Gift cards",
+      "domain": "giftcards",
+      "entityRefs": [
+        "gift_card"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.giftcards"
+      ]
+    },
+    {
+      "id": "giftcard.detail",
+      "title": "Gift card detail",
+      "domain": "giftcards",
+      "entityRefs": [
+        "gift_card",
+        "gift_card_transaction"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.giftcards"
+      ]
+    },
+    {
+      "id": "giftcard.issue",
+      "title": "Issue gift card",
+      "domain": "giftcards",
+      "entityRefs": [
+        "gift_card"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.giftcards"
+      ]
+    },
+    {
+      "id": "giftcard.redeem",
+      "title": "Redeem gift card",
+      "domain": "giftcards",
+      "entityRefs": [
+        "gift_card",
+        "gift_card_transaction"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.giftcards",
+        "retail.pos"
+      ]
+    },
+    {
+      "id": "giftcard.transactions",
+      "title": "Gift card transactions",
+      "domain": "giftcards",
+      "entityRefs": [
+        "gift_card_transaction"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.giftcards"
+      ]
+    },
+    {
+      "id": "loyalty.accounts",
+      "title": "Loyalty accounts",
+      "domain": "loyalty",
+      "entityRefs": [
+        "loyalty_account"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.loyalty"
+      ]
+    },
+    {
+      "id": "loyalty.account_detail",
+      "title": "Loyalty account detail",
+      "domain": "loyalty",
+      "entityRefs": [
+        "loyalty_account",
+        "loyalty_transaction"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.loyalty"
+      ]
+    },
+    {
+      "id": "loyalty.points",
+      "title": "Loyalty points",
+      "domain": "loyalty",
+      "entityRefs": [
+        "loyalty_account",
+        "loyalty_transaction"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.loyalty"
+      ]
+    },
+    {
+      "id": "loyalty.rewards",
+      "title": "Loyalty rewards",
+      "domain": "loyalty",
+      "entityRefs": [
+        "loyalty_reward",
+        "loyalty_tier"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.loyalty"
+      ]
+    },
+    {
+      "id": "loyalty.tiers",
+      "title": "Loyalty tiers",
+      "domain": "loyalty",
+      "entityRefs": [
+        "loyalty_tier"
+      ],
+      "relevantCapabilityDomains": [
+        "retail.loyalty"
+      ]
+    },
+    {
+      "id": "report.catalog",
+      "title": "Report catalog",
+      "domain": "reporting",
+      "entityRefs": [
+        "report_definition"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting"
+      ]
+    },
+    {
+      "id": "report.run",
+      "title": "Run report",
+      "domain": "reporting",
+      "entityRefs": [
+        "report_definition",
+        "report_run"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting"
+      ]
+    },
+    {
+      "id": "report.run_detail",
+      "title": "Report run detail",
+      "domain": "reporting",
+      "entityRefs": [
+        "report_run"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting"
+      ]
+    },
+    {
+      "id": "report.schedules",
+      "title": "Report schedules",
+      "domain": "reporting",
+      "entityRefs": [
+        "report_schedule"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting"
+      ]
+    },
+    {
+      "id": "report.sales_summary",
+      "title": "Sales summary",
+      "domain": "reporting",
+      "entityRefs": [
+        "invoice",
+        "invoice_line"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting",
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "report.payments_summary",
+      "title": "Payments summary",
+      "domain": "reporting",
+      "entityRefs": [
+        "payment",
+        "payment_allocation"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting",
+        "accounting.payments"
+      ]
+    },
+    {
+      "id": "report.aged_receivables",
+      "title": "Aged receivables",
+      "domain": "reporting",
+      "entityRefs": [
+        "invoice",
+        "customer"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting",
+        "accounting.invoices"
+      ]
+    },
+    {
+      "id": "report.aged_payables",
+      "title": "Aged payables",
+      "domain": "reporting",
+      "entityRefs": [
+        "supplier",
+        "payment"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting",
+        "accounting.suppliers"
+      ]
+    },
+    {
+      "id": "report.stock_summary",
+      "title": "Stock summary",
+      "domain": "reporting",
+      "entityRefs": [
+        "stock_item",
+        "stock_movement"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting",
+        "stock.inventory"
+      ]
+    },
+    {
+      "id": "report.payroll_summary",
+      "title": "Payroll summary",
+      "domain": "reporting",
+      "entityRefs": [
+        "payroll_run",
+        "payroll_line"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting",
+        "people.payroll"
+      ]
+    },
+    {
+      "id": "report.tax_summary",
+      "title": "Tax summary",
+      "domain": "reporting",
+      "entityRefs": [
+        "tax_return",
+        "tax_return_line"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting",
+        "tax.config"
+      ]
+    },
+    {
+      "id": "report.audit_export",
+      "title": "Audit export",
+      "domain": "reporting",
+      "entityRefs": [
+        "audit_log"
+      ],
+      "relevantCapabilityDomains": [
+        "insight.reporting",
+        "platform.audit"
+      ]
+    },
+    {
+      "id": "admin.users",
+      "title": "Users",
+      "domain": "admin",
+      "entityRefs": [
+        "user"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.identity"
+      ]
+    },
+    {
+      "id": "admin.user_detail",
+      "title": "User detail",
+      "domain": "admin",
+      "entityRefs": [
+        "user",
+        "user_session",
+        "role"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.identity"
+      ]
+    },
+    {
+      "id": "admin.roles",
+      "title": "Roles",
+      "domain": "admin",
+      "entityRefs": [
+        "role",
+        "permission",
+        "role_permission"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.identity"
+      ]
+    },
+    {
+      "id": "admin.permissions",
+      "title": "Permissions",
+      "domain": "admin",
+      "entityRefs": [
+        "permission"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.identity"
+      ]
+    },
+    {
+      "id": "admin.policy",
+      "title": "Policy",
+      "domain": "admin",
+      "entityRefs": [
+        "setting"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.identity",
+        "platform.config"
+      ]
+    },
+    {
+      "id": "admin.settings",
+      "title": "Settings",
+      "domain": "config",
+      "entityRefs": [
+        "setting",
+        "config_profile"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.config"
+      ]
+    },
+    {
+      "id": "admin.integrations",
+      "title": "Integrations",
+      "domain": "config",
+      "entityRefs": [
+        "integration_endpoint",
+        "webhook_subscription"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.config"
+      ]
+    },
+    {
+      "id": "admin.audit",
+      "title": "Audit log",
+      "domain": "security",
+      "entityRefs": [
+        "audit_log"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.audit"
+      ]
+    },
+    {
+      "id": "security.access_reviews",
+      "title": "Access reviews",
+      "domain": "security",
+      "entityRefs": [
+        "access_review",
+        "role_permission"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.identity"
+      ]
+    },
+    {
+      "id": "security.backups",
+      "title": "Backups",
+      "domain": "security",
+      "entityRefs": [
+        "config_profile",
+        "setting"
+      ],
+      "relevantCapabilityDomains": [
+        "platform.config"
+      ]
+    }
+  ]
+}

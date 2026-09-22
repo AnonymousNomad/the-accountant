@@ -57,6 +57,10 @@ for (const file of mjsFiles) {
 }
 
 // ---------------------------------------------------------------- 2. forbidden code in src/
+// One documented exception: src/models/llama-server-provider.mjs owns a local engine process and
+// therefore imports `spawn`. It never uses a shell, never interpolates model or user input into the
+// argument list, and is the only module allowed to do this (checked by the rules below).
+const PROCESS_OWNER = 'src/models/llama-server-provider.mjs';
 const FORBIDDEN = [
   { pattern: /child_process/, message: 'child_process is forbidden in src/ (no shell execution)' },
   { pattern: /\beval\s*\(/, message: 'eval is forbidden' },
@@ -68,15 +72,23 @@ const FORBIDDEN = [
   { pattern: /require\s*\(/, message: 'CommonJS require is forbidden in ESM modules' }
 ];
 for (const file of srcFiles) {
+  const rel = relative(ROOT, file).split('\\').join('/');
   const text = readFileSync(file, 'utf8');
   const lines = text.split('\n');
   for (const rule of FORBIDDEN) {
     lines.forEach((line, index) => {
-      if (rule.pattern.test(line) && !line.trim().startsWith('*') && !line.trim().startsWith('//')) {
+      const isComment = line.trim().startsWith('*') || line.trim().startsWith('//');
+      if (isComment) return;
+      if (rule.pattern.test(line)) {
+        if (rule.pattern.source === 'child_process' && rel === PROCESS_OWNER) return;
         fail(`${relative(ROOT, file)}:${index + 1} ${rule.message}`);
       }
     });
   }
+  // No shell, anywhere, ever.
+  lines.forEach((line, index) => {
+    if (/shell\s*:\s*true/.test(line)) fail(`${relative(ROOT, file)}:${index + 1} shell: true is forbidden`);
+  });
 }
 
 // ---------------------------------------------------------------- 3. secret patterns

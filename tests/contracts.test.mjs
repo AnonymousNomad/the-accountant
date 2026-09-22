@@ -13,6 +13,8 @@ import { canonicalJson, hashAction, chainHash } from '../src/core/canonical.mjs'
 import { validate, assertSupportedSchema, isPlaceholder } from '../src/core/schema.mjs';
 import { parseEnvelope, extractSingleJsonObject } from '../src/models/response-parser.mjs';
 import { ENVELOPE_SCHEMA } from '../src/models/prompt.mjs';
+import { makeHarness, turn, proposal } from './helpers/fixtures.mjs';
+import { STATUS } from '../src/harness.mjs';
 
 test('canonical JSON sorts keys, keeps array order and refuses non-finite numbers', () => {
   assert.equal(canonicalJson({ b: 1, a: [2, 1] }), '{"a":[2,1],"b":1}');
@@ -89,15 +91,78 @@ test('exactly one JSON object is accepted; prose, fences and truncation are refu
 
 test('the envelope validator enforces per-kind fields and rejects authority fields', () => {
   const base = { kind: 'proposal', reasoningSummary: 'why' };
-  assert.throws(() => parseEnvelope(JSON.stringify({ ...base, capability: 'x.y' })), /proposalId/);
+  assert.throws(() => parseEnvelope(JSON.stringify({ ...base, capability: 'x.y' })), /arguments/);
+  assert.throws(() => parseEnvelope(JSON.stringify({ ...base, capability: '', arguments: {} })), /capability/);
   assert.throws(() => parseEnvelope(JSON.stringify({ ...base, proposalId: 'p1', capability: 'customer.create' })), /arguments/);
   assert.throws(
     () => parseEnvelope(JSON.stringify({ ...base, proposalId: 'p1', capability: 'customer.create', arguments: {}, risk: 'READ' })),
     /risk is not an allowed field/
   );
   assert.throws(() => parseEnvelope(JSON.stringify({ kind: 'clarification', reasoningSummary: 'x' })), /question/);
-  assert.throws(() => parseEnvelope(JSON.stringify({ kind: 'clarification', question: 'Which one?', reasoningSummary: 'x', capability: 'y.z' })), /must not contain/);
+  assert.throws(() => parseEnvelope(JSON.stringify({ kind: 'clarification', question: '', reasoningSummary: 'x' })), /non-empty/);
+  assert.throws(
+    () => parseEnvelope(JSON.stringify({ kind: 'clarification', question: 'Which one?', reasoningSummary: 'x', risk: 'READ' })),
+    /risk is not an allowed field/
+  );
   assert.throws(() => parseEnvelope(JSON.stringify({ kind: 'nonsense', reasoningSummary: 'x' })), /enum|must be one of/);
+});
+
+test('the all-fields-required envelope form (empty strings for inapplicable fields) is accepted', () => {
+  // This is the form the engine is asked to emit, because a grammar can only enforce what the
+  // schema requires (research R-16; docs/LIVE_MODEL_VALIDATION.md).
+  const proposal = parseEnvelope(
+    JSON.stringify({
+      kind: 'proposal',
+      capability: 'customer.search',
+      arguments: { query: 'Smith' },
+      question: '',
+      reason: '',
+      reasoningSummary: 'looking up the customer'
+    })
+  );
+  assert.equal(proposal.kind, 'proposal');
+  assert.deepEqual(proposal.kind === 'proposal' && proposal.arguments, { query: 'Smith' });
+
+  const clarification = parseEnvelope(
+    JSON.stringify({ kind: 'clarification', capability: '', arguments: {}, question: 'Which invoice?', reason: '', reasoningSummary: 'need the id' })
+  );
+  assert.equal(clarification.kind, 'clarification');
+
+  const unsupported = parseEnvelope(
+    JSON.stringify({ kind: 'unsupported', capability: '', arguments: {}, question: '', reason: 'no capability moves money', reasoningSummary: 'unsupported' })
+  );
+  assert.equal(unsupported.kind, 'unsupported');
+});
+
+test('a messy model-supplied proposal id is accepted, and the harness normalizes it', async () => {
+  // The identifier is harness bookkeeping, not model reasoning: a small model should not fail
+  // here. The audit identity is the canonical proposal hash (evidence: LIVE_MODEL_VALIDATION.md).
+  const parsed = parseEnvelope(
+    JSON.stringify({
+      kind: 'proposal',
+      proposalId: 'Invoice issue for INV-0004 (draft)',
+      capability: 'invoice.preview',
+      arguments: { invoiceId: 'INV-0004' },
+      reasoningSummary: 'reading the draft'
+    })
+  );
+  assert.equal(parsed.kind, 'proposal');
+
+  const { bundle, cleanup } = await makeHarness();
+  try {
+    const result = await turn(
+      bundle,
+      'show me invoice INV-0004',
+      proposal('invoice.preview', { invoiceId: 'INV-0004' }, 'show INV-0004 / draft #2')
+    );
+    assert.equal(result.status, STATUS.EXECUTED_VERIFIED);
+    assert.equal(result.proposal?.proposalId, 'show-INV-0004-draft-2');
+    const events = await bundle.journal.read(50);
+    const proposed = events.find((event) => event.type === 'PROPOSED' && event.runId === result.runId);
+    assert.equal(proposed?.data.modelProposalId, 'show INV-0004 / draft #2', 'the raw id is preserved for audit');
+  } finally {
+    await cleanup();
+  }
 });
 
 test('extractSingleJsonObject handles braces and escapes inside strings', () => {

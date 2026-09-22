@@ -1,0 +1,125 @@
+{
+  "$schemaNote": "SCALE-FAITHFUL / BEHAVIOR-SYNTHETIC / NOT A REPLICA of any external system. No real accounting, tax or payroll rules exist here.",
+  "generatedBy": "simulation/generate-topology.mjs",
+  "counts": {
+    "total": 4
+  },
+  "jurisdictions": [
+    {
+      "id": "NZ",
+      "name": "New Zealand",
+      "currency": "NZD",
+      "dateFormat": "DD/MM/YYYY",
+      "requiredExtraFields": [
+        "customer.address.country_code",
+        "invoice.currency"
+      ],
+      "capabilityAvailability": {
+        "invoice.issue": true,
+        "invoice.send": true,
+        "payment.reverse": true,
+        "journal.post": true,
+        "payroll.preview": true,
+        "payroll.run": true,
+        "tax.config_read": true,
+        "inventory.adjust": false,
+        "giftcard.lookup": true,
+        "loyalty.lookup": true,
+        "pos.barcode_scan": true
+      },
+      "workflowPrerequisites": [
+        "An invoice must be in draft state before it can be issued.",
+        "A payroll run must be submitted before it can be approved.",
+        "A payment must be recorded before it can be applied to an invoice.",
+        "A stock count must be finalized before its differences change on-hand quantities."
+      ],
+      "note": "No real statutory rules are implemented for this jurisdiction. Tax rates, thresholds, filing obligations and rate tables are intentionally absent; only synthetic display and workflow metadata is present."
+    },
+    {
+      "id": "AU",
+      "name": "Australia",
+      "currency": "AUD",
+      "dateFormat": "DD/MM/YYYY",
+      "requiredExtraFields": [
+        "customer.address.country_code"
+      ],
+      "capabilityAvailability": {
+        "invoice.issue": true,
+        "invoice.send": true,
+        "payment.reverse": true,
+        "journal.post": true,
+        "payroll.preview": true,
+        "payroll.run": true,
+        "tax.config_read": true,
+        "inventory.adjust": true,
+        "giftcard.lookup": true,
+        "loyalty.lookup": false,
+        "pos.barcode_scan": true
+      },
+      "workflowPrerequisites": [
+        "An invoice must be in draft state before it can be issued.",
+        "A payroll run must be submitted before it can be approved.",
+        "A timesheet must be approved before its hours are available to a payroll run.",
+        "A payment must be recorded before it can be applied to an invoice."
+      ],
+      "note": "No real statutory rules are implemented for this jurisdiction. Tax rates, thresholds, filing obligations and rate tables are intentionally absent; only synthetic display and workflow metadata is present."
+    },
+    {
+      "id": "US",
+      "name": "United States",
+      "currency": "USD",
+      "dateFormat": "MM/DD/YYYY",
+      "requiredExtraFields": [
+        "customer.address.state_code",
+        "customer.address.postal_code"
+      ],
+      "capabilityAvailability": {
+        "invoice.issue": true,
+        "invoice.send": true,
+        "payment.reverse": false,
+        "journal.post": true,
+        "payroll.preview": true,
+        "payroll.run": false,
+        "tax.config_read": true,
+        "inventory.adjust": true,
+        "giftcard.lookup": true,
+        "loyalty.lookup": true,
+        "pos.barcode_scan": true
+      },
+      "workflowPrerequisites": [
+        "An invoice must be issued before a payment can be applied to it.",
+        "A journal entry must be reviewed before it can be posted.",
+        "A stock count must be finalized before its differences change on-hand quantities."
+      ],
+      "note": "No real statutory rules are implemented for this jurisdiction. Tax rates, thresholds, filing obligations and rate tables are intentionally absent; only synthetic display and workflow metadata is present."
+    },
+    {
+      "id": "UK",
+      "name": "United Kingdom",
+      "currency": "GBP",
+      "dateFormat": "DD/MM/YYYY",
+      "requiredExtraFields": [
+        "customer.address.postal_code"
+      ],
+      "capabilityAvailability": {
+        "invoice.issue": true,
+        "invoice.send": true,
+        "payment.reverse": true,
+        "journal.post": true,
+        "payroll.preview": true,
+        "payroll.run": true,
+        "tax.config_read": true,
+        "inventory.adjust": true,
+        "giftcard.lookup": false,
+        "loyalty.lookup": true,
+        "pos.barcode_scan": true
+      },
+      "workflowPrerequisites": [
+        "An invoice must be in draft state before it can be issued.",
+        "A payroll run must be submitted before it can be approved.",
+        "A leave request must be approved before the dates block a roster shift."
+      ],
+      "note": "No real statutory rules are implemented for this jurisdiction. Tax rates, thresholds, filing obligations and rate tables are intentionally absent; only synthetic display and workflow metadata is present."
+    }
+  ]
+}

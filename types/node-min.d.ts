@@ -25,9 +25,14 @@ declare module 'node:crypto' {
 }
 
 declare module 'node:fs' {
-  export function readFileSync(path: string, encoding: string): string;
+  export function readFileSync(path: string, encoding?: string): string;
   export function writeFileSync(path: string, data: string, encoding?: string): void;
+  export function appendFileSync(path: string | number, data: string, encoding?: string): void;
+  export function openSync(path: string, flags: string): number;
+  export function closeSync(fd: number): void;
+  export function fsyncSync(fd: number): void;
   export function existsSync(path: string): boolean;
+  export function mkdirSync(path: string, options?: { recursive?: boolean }): string | undefined;
   export function mkdtempSync(prefix: string): string;
   export function rmSync(path: string, options?: { recursive?: boolean; force?: boolean }): void;
   export interface Dirent {
@@ -120,6 +125,26 @@ declare module 'node:child_process' {
       stdio?: any;
     }
   ): { status: number | null; stdout: string; stderr: string; error?: Error; pid?: number };
+
+  export interface ChildProcess {
+    pid?: number;
+    exitCode: number | null;
+    killed: boolean;
+    killedByUs?: boolean;
+    kill(signal?: string): boolean;
+    on(event: string, listener: (...args: any[]) => void): ChildProcess;
+    once(event: string, listener: (...args: any[]) => void): ChildProcess;
+    removeAllListeners(event?: string): ChildProcess;
+    unref(): void;
+    stderr?: any;
+    stdout?: any;
+  }
+
+  export function spawn(
+    command: string,
+    args?: string[],
+    options?: { cwd?: string; env?: Record<string, string | undefined>; stdio?: any; windowsHide?: boolean; detached?: boolean }
+  ): ChildProcess;
 }
 
 declare module 'node:test' {

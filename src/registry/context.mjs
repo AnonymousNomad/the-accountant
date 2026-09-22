@@ -30,6 +30,9 @@ export const FILTER_REASONS = Object.freeze({
   REGISTRY_EMPTY: 'REGISTRY_EMPTY'
 });
 
+/** Discovery version. Bump when ranking or filtering changes, so evidence is comparable. */
+export const DISCOVERY_VERSION = 'discovery-v2-keyword-context';
+
 /**
  * @typedef {object} CapabilityContext
  * @property {string} snapshotId
@@ -49,6 +52,9 @@ export const FILTER_REASONS = Object.freeze({
  * @property {string} text                     Rendered context text (what the model sees).
  * @property {{ capabilityCount: number, schemaBytes: number, textChars: number, approxTokens: number }} budget
  * @property {number} registrySize
+ * @property {string} discoveryVersion
+ * @property {{ id: string, score: number }[]} ranked  Ranked candidates AFTER eligibility filtering,
+ *   BEFORE the exposure cap — the input to discovery-recall measurement.
  */
 
 /**
@@ -158,7 +164,9 @@ export function buildCapabilityContext(options) {
       textChars: text.length,
       approxTokens: approxTokens(text)
     },
-    registrySize: all.length
+    registrySize: all.length,
+    discoveryVersion: DISCOVERY_VERSION,
+    ranked: considered.map((entry) => ({ id: entry.capability.id, score: entry.score }))
   };
 }
 

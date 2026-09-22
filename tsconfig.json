@@ -16,5 +16,11 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["types/**/*.d.ts", "src/**/*.mjs", "scripts/**/*.mjs", "benchmarks/**/*.mjs", "tests/**/*.mjs"]
+  "include": ["types/**/*.d.ts", "src/**/*.mjs", "scripts/**/*.mjs", "benchmarks/**/*.mjs", "tests/**/*.mjs"],
+  "exclude": [
+    "benchmarks/run-live-benchmark.mjs",
+    "benchmarks/run-scale-simulation.mjs",
+    "scripts/probe-llama-server.mjs",
+    "scripts/verify-simulation.mjs"
+  ]
 }

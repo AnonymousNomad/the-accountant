@@ -15,7 +15,7 @@ import { hashAction, sha256Hex, canonicalJson } from './core/canonical.mjs';
 import { makeId, deepFreeze } from './core/util.mjs';
 import { validate } from './core/schema.mjs';
 import { buildCapabilityContext } from './registry/context.mjs';
-import { buildSystemPrompt } from './models/prompt.mjs';
+import { buildSystemPrompt, ENVELOPE_FORMAT_SCHEMA } from './models/prompt.mjs';
 import { parseEnvelope } from './models/response-parser.mjs';
 import { DECISION } from './policy/policy-engine.mjs';
 import { EVENT } from './evidence/journal.mjs';
@@ -77,10 +77,11 @@ export const NORMAL_STATUSES = Object.freeze([
  * @param {{ mock: any, http: any }} deps.adapters
  * @param {any} deps.verifiers
  * @param {(checkId: string, capabilityId: string) => { available: boolean, detail?: string }} deps.prerequisite
- * @param {{ text: string, hash: string, baseContractText?: string, baseContractHash?: string }} deps.sop
+ * @param {{ text: string, hash: string, baseContractText?: string, baseContractHash?: string, doctrineText?: string, doctrineHash?: string }} deps.sop
  * @param {string} deps.sessionId
  * @param {import('./core/util.mjs').Clock} deps.clock
  * @param {boolean} [deps.includeContextText]
+ * @param {'full'|'minimal'} [deps.promptMode]  Live-experiment control (Arm C); authority is unaffected.
  */
 export function createHarness(deps) {
   const {
@@ -100,6 +101,7 @@ export function createHarness(deps) {
     clock
   } = deps;
   const includeContextText = deps.includeContextText === true;
+  const promptMode = deps.promptMode === 'minimal' ? 'minimal' : 'full';
 
   let turn = 0;
   const seenProposalIds = new Set();
@@ -163,8 +165,12 @@ export function createHarness(deps) {
             domains: context.domains,
             taskKeywords: context.taskKeywords,
             budget: context.budget,
+            discoveryVersion: context.discoveryVersion,
+            ranked: context.ranked,
             sopHash: sop.hash,
             baseContractHash: sop.baseContractHash ?? null,
+            doctrineHash: sop.doctrineHash ?? null,
+            promptMode,
             configHash,
             ...(includeContextText ? { contextText: context.text } : {})
           }
@@ -173,7 +179,9 @@ export function createHarness(deps) {
         const systemPrompt = buildSystemPrompt({
           sopText: sop.text,
           baseContractText: sop.baseContractText ?? '',
-          contextText: context.text
+          doctrineText: sop.doctrineText ?? '',
+          contextText: context.text,
+          mode: promptMode
         });
 
         const providerStart = Date.now();
@@ -215,13 +223,14 @@ export function createHarness(deps) {
           return finish(STATUS.UNSUPPORTED, envelope.reason, { providerMs, contextHash: context.contextHash });
         }
 
-        // ------------------------------------------------------------ validation
-        if (seenProposalIds.has(envelope.proposalId)) {
+        // ---- validation
+        const normalizedId = normalizeProposalId(envelope.proposalId, envelope.capability, envelope.arguments);
+        if (seenProposalIds.has(normalizedId)) {
           await record(EVENT.PROPOSAL_REJECTED, {
-            proposalId: envelope.proposalId,
+            proposalId: normalizedId,
             data: { stage: 'validation', code: CODES.PROPOSAL_ID_REPLAY, detail: 'proposalId was already used in this session' }
           });
-          return finish(STATUS.REJECTED, `proposalId "${envelope.proposalId}" was already used in this session`, {
+          return finish(STATUS.REJECTED, `proposalId "${normalizedId}" was already used in this session`, {
             providerMs,
             contextHash: context.contextHash
           });
@@ -275,9 +284,9 @@ export function createHarness(deps) {
           });
         }
 
-        seenProposalIds.add(envelope.proposalId);
+        seenProposalIds.add(normalizedId);
         const proposal = deepFreeze({
-          proposalId: envelope.proposalId,
+          proposalId: normalizedId,
           capability: capability.id,
           arguments: envelope.arguments,
           reasoningSummary: envelope.reasoningSummary
@@ -292,6 +301,7 @@ export function createHarness(deps) {
           data: {
             arguments: envelope.arguments,
             reasoningSummary: envelope.reasoningSummary,
+            modelProposalId: envelope.proposalId,
             capabilityDefinitionHash: capability.definitionHash,
             registryHash: context.registryHash
           }
@@ -919,26 +929,32 @@ export function createHarness(deps) {
 }
 
 /**
- * The envelope schema passed to the runtime as a `format` constraint. Kept in sync with
- * models/prompt.mjs by construction: both import the same object shape, and the parser is the
- * authority on what is acceptable.
+ * The envelope schema passed to the runtime as a `format`/`response_format` constraint. It is the
+ * all-fields-required form, because a grammar can only enforce what the schema requires.
  * @returns {Record<string, unknown>}
  */
 function envelopeFormatSchema() {
-  return {
-    type: 'object',
-    additionalProperties: false,
-    required: ['kind', 'reasoningSummary'],
-    properties: {
-      kind: { type: 'string', enum: ['proposal', 'clarification', 'unsupported'] },
-      reasoningSummary: { type: 'string', minLength: 1, maxLength: 500 },
-      proposalId: { type: 'string', minLength: 1, maxLength: 64 },
-      capability: { type: 'string', minLength: 3, maxLength: 64 },
-      arguments: { type: 'object' },
-      question: { type: 'string', minLength: 1, maxLength: 300 },
-      reason: { type: 'string', minLength: 1, maxLength: 300 }
-    }
-  };
+  return ENVELOPE_FORMAT_SCHEMA;
+}
+
+/**
+ * Normalize the identifier the model supplied. It is audit bookkeeping, not authority: the
+ * canonical proposal hash is what permits bind to. An id that sanitises to nothing, or a model
+ * that supplies none, yields a stable hash-derived id, so a small model is never failed for
+ * bookkeeping it should not have to do (evidence: LIVE_MODEL_VALIDATION.md, first live run).
+ * @param {string} raw
+ * @param {string} capability
+ * @param {Record<string, unknown>} args
+ * @returns {string}
+ */
+function normalizeProposalId(raw, capability, args) {
+  const sanitized = String(raw ?? '')
+    .trim()
+    .replace(/[^A-Za-z0-9._:-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+  if (sanitized.length > 0) return sanitized;
+  return `p-${hashAction(capability, args).slice(0, 12)}`;
 }
 
 /**

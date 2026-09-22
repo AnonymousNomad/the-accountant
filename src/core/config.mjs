@@ -9,7 +9,7 @@
  * @module core/config
  */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { dirname, isAbsolute, resolve } from 'node:path';
 import { ConfigError, CODES } from './errors.mjs';
 import { validate } from './schema.mjs';
@@ -19,7 +19,7 @@ import { RISK } from '../policy/risk.mjs';
 /**
  * @typedef {object} HarnessConfig
  * @property {{ actorId: string, workspaceId: string }} identity
- * @property {{ kind: string, baseUrl: string, model: string, timeoutMs: number, numCtx: number, keepAlive: string, seed: number, temperature: number, allowNonLocalProvider: boolean }} provider
+ * @property {{ kind: string, baseUrl: string, model: string, timeoutMs: number, numCtx: number, keepAlive: string, seed: number, temperature: number, allowNonLocalProvider: boolean, executable?: string, modelPath?: string, manageServer?: boolean, port?: number, threads?: number, startupTimeoutMs?: number, inferenceTimeoutMs?: number, maxTokens?: number, topK?: number, repeatPenalty?: number, structuredMode?: string }} provider
  * @property {{ riskAllowlist: string[], requireConfirmationFor: string[], grantedPermissions: string[] }} policy
  * @property {{ ttlSeconds: number }} confirmation
  * @property {{ permitTtlSeconds: number }} authority
@@ -47,7 +47,7 @@ const CONFIG_SCHEMA = {
       additionalProperties: false,
       required: ['kind', 'baseUrl', 'model'],
       properties: {
-        kind: { type: 'string', enum: ['ollama', 'scripted'] },
+        kind: { type: 'string', enum: ['ollama', 'scripted', 'llama-server'] },
         baseUrl: { type: 'string', minLength: 8, maxLength: 200 },
         model: { type: 'string', minLength: 1, maxLength: 120 },
         timeoutMs: { type: 'integer', minimum: 100, maximum: 600000 },
@@ -55,7 +55,18 @@ const CONFIG_SCHEMA = {
         keepAlive: { type: 'string', minLength: 1, maxLength: 32 },
         seed: { type: 'integer', minimum: 0, maximum: 2147483647 },
         temperature: { type: 'number', minimum: 0, maximum: 2 },
-        allowNonLocalProvider: { type: 'boolean' }
+        allowNonLocalProvider: { type: 'boolean' },
+        executable: { type: 'string', minLength: 3, maxLength: 300 },
+        modelPath: { type: 'string', minLength: 3, maxLength: 300 },
+        manageServer: { type: 'boolean' },
+        port: { type: 'integer', minimum: 0, maximum: 65535 },
+        threads: { type: 'integer', minimum: 1, maximum: 32 },
+        startupTimeoutMs: { type: 'integer', minimum: 1000, maximum: 600000 },
+        inferenceTimeoutMs: { type: 'integer', minimum: 100, maximum: 600000 },
+        maxTokens: { type: 'integer', minimum: 1, maximum: 8192 },
+        topK: { type: 'integer', minimum: 0, maximum: 200 },
+        repeatPenalty: { type: 'number', minimum: 0.5, maximum: 2 },
+        structuredMode: { type: 'string', enum: ['json_schema', 'json_object', 'none'] }
       }
     },
     policy: {
@@ -86,7 +97,10 @@ const CONFIG_SCHEMA = {
       required: ['maxCapabilities', 'domains'],
       properties: {
         maxCapabilities: { type: 'integer', minimum: 1, maximum: 32 },
-        domains: { type: 'array', items: { type: 'string', minLength: 1, maxLength: 64 }, minItems: 1, maxItems: 32 }
+        // An EMPTY list is meaningful and supported: it disables the domain filter, so exposure is
+        // ranked by relevance across the whole registry and still bounded by maxCapabilities. This is
+        // the benchmark-blind discovery mode (Phase 3); it is not "expose everything".
+        domains: { type: 'array', items: { type: 'string', minLength: 1, maxLength: 64 }, minItems: 0, maxItems: 32 }
       }
     },
     adapters: {
@@ -227,6 +241,28 @@ function enforceSemantics(config) {
 
   if (config.provider.kind === 'ollama') {
     assertLoopback(config.provider.baseUrl, config.provider.allowNonLocalProvider, 'provider.baseUrl');
+  }
+
+  if (config.provider.kind === 'llama-server') {
+    // Local engine only. Either the provider owns the process (then the executable and the model
+    // artifact must exist as files) or it attaches to an engine that is already running on
+    // loopback. Nothing here may fetch anything.
+    if (config.provider.manageServer !== false) {
+      for (const field of ['executable', 'modelPath']) {
+        const value = /** @type {Record<string, unknown>} */ (config.provider)[field];
+        if (typeof value !== 'string' || value.length === 0) {
+          throw new ConfigError(
+            CODES.CONFIG_INVALID,
+            `provider.${field} is required when provider.kind is "llama-server" and manageServer is not false`
+          );
+        }
+        if (!existsSync(value)) {
+          throw new ConfigError(CODES.CONFIG_INVALID, `provider.${field} does not exist: ${value}`);
+        }
+      }
+    } else {
+      assertLoopback(config.provider.baseUrl, false, 'provider.baseUrl');
+    }
   }
 
   if (config.adapters.http.enabled) {

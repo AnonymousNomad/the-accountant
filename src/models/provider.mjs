@@ -11,6 +11,7 @@
 import { ProviderError, CODES } from '../core/errors.mjs';
 import { createOllamaProvider } from './ollama-provider.mjs';
 import { createScriptedProvider } from './scripted-provider.mjs';
+import { createLlamaServerProvider } from './llama-server-provider.mjs';
 
 /**
  * @typedef {object} ProviderRequest
@@ -23,7 +24,7 @@ import { createScriptedProvider } from './scripted-provider.mjs';
 /**
  * @typedef {object} ProviderResult
  * @property {string} text
- * @property {{ provider: string, model: string, doneReason?: string, evalCount?: number, totalDurationMs?: number, loadDurationMs?: number, serverVersion?: string|null, seed?: number, temperature?: number }} meta
+ * @property {{ provider: string, model: string, doneReason?: string, evalCount?: number, totalDurationMs?: number, loadDurationMs?: number, loadMs?: number, serverVersion?: string|null, seed?: number, temperature?: number, promptTokens?: number, completionTokens?: number, promptEvalMs?: number, finishReason?: string, contentChars?: number, reasoningChars?: number }} meta
  */
 
 /**
@@ -32,11 +33,15 @@ import { createScriptedProvider } from './scripted-provider.mjs';
  * @property {string} model
  * @property {(request: ProviderRequest) => Promise<ProviderResult>} complete
  * @property {() => Promise<string|null>} [getVersion]
+ * @property {() => Promise<void>} [stop]
+ * @property {() => Promise<void>} [ensureStarted]
+ * @property {() => Promise<{ ok: boolean, status: string, modelId?: string, loadMs?: number }>} [health]
+ * @property {() => number|undefined} [pid]
  */
 
 /**
  * Build a provider from trusted configuration.
- * @param {{ kind: string, baseUrl: string, model: string, timeoutMs: number, numCtx: number, keepAlive: string, seed: number, temperature: number, allowNonLocalProvider: boolean }} providerConfig
+ * @param {any} providerConfig  Validated by core/config.mjs before it reaches this factory.
  * @param {{ script?: Array<{ prompt: string, response: string }>, fetchImpl?: typeof fetch }} [options]
  * @returns {Provider}
  */
@@ -56,6 +61,24 @@ export function createProvider(providerConfig, options = {}) {
       });
     case 'scripted':
       return createScriptedProvider({ script: options.script ?? [] });
+    case 'llama-server':
+      return createLlamaServerProvider({
+        executable: String(providerConfig.executable ?? ''),
+        modelPath: String(providerConfig.modelPath ?? ''),
+        manageServer: providerConfig.manageServer !== false,
+        baseUrl: providerConfig.baseUrl,
+        port: providerConfig.port ?? 0,
+        ctxSize: providerConfig.numCtx,
+        threads: providerConfig.threads ?? 4,
+        startupTimeoutMs: providerConfig.startupTimeoutMs ?? 120000,
+        inferenceTimeoutMs: providerConfig.inferenceTimeoutMs ?? providerConfig.timeoutMs ?? 120000,
+        temperature: providerConfig.temperature,
+        topK: providerConfig.topK ?? 50,
+        repeatPenalty: providerConfig.repeatPenalty ?? 1.05,
+        maxTokens: providerConfig.maxTokens ?? 512,
+        structuredMode: providerConfig.structuredMode ?? 'json_schema',
+        ...(options.fetchImpl ? { fetchImpl: options.fetchImpl } : {})
+      });
     default:
       throw new ProviderError(CODES.PROVIDER_NOT_CONFIGURED, `unsupported provider kind "${providerConfig.kind}"`);
   }

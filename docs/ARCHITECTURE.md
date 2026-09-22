@@ -17,7 +17,7 @@ The model is a reasoning component. It is never the authority.
 User
   │  natural language
   ▼
-Provider boundary (Ollama / scripted fixture)          src/models/*
+Provider boundary (Ollama / llama-server / scripted)   src/models/*
   │  untrusted text
   ▼
 Response parser: exactly one JSON envelope             src/models/response-parser.mjs
@@ -53,6 +53,7 @@ Result + append-only hash-chained evidence             src/harness.mjs, src/evid
 | `src/models/provider.mjs` | The provider interface and selection | Know about capabilities, policy, or adapters |
 | `src/models/ollama-provider.mjs` | HTTP contract with a local Ollama server; typed error mapping; `format` schema; no credentials | Send secrets; assume output validity; retry silently |
 | `src/models/scripted-provider.mjs` | Deterministic fixture replay for tests, CI, and the scripted demo | Pretend to be a model; bypass the pipeline |
+| `src/models/llama-server-provider.mjs` | Spawn/health/model-id/infer/stop for a local llama.cpp engine; schema-constrained output; loopback only, no shell, no retry; kills only the process it started | Accept a non-loopback host; outlive its engine; convert a failure into a value |
 | `src/models/prompt.mjs` | System prompt: SOP first, exposed capability catalogue, envelope format | Expose capabilities that are not selected for this turn |
 | `src/models/response-parser.mjs` | Deterministic extraction of exactly one JSON envelope | Repair, guess, or accept prose-prefixed JSON |
 | `src/registry/capability.mjs` | Capability definition schema, schema-complexity budget, registration-time validation | Accept a capability without a verifier, permission, or risk class |
@@ -89,9 +90,11 @@ Result + append-only hash-chained evidence             src/harness.mjs, src/evid
 { "kind": "unsupported",   "reason": "No registered capability can transfer funds.",           "reasoningSummary": "…" }
 ```
 
-Rules: exactly one JSON object; `proposalId` matches `^[A-Za-z0-9._:-]{1,64}$` and is unique per
-session; `reasoningSummary` is 1–500 characters; a `risk` field is **never** accepted (unknown
-fields are rejected). Placeholder strings are rejected where a field declares `nonPlaceholder`.
+Rules: exactly one JSON object; `proposalId` is optional and, when supplied, a string of at most 64
+characters — the harness normalizes it and derives the audit identity from the canonical proposal hash
+(a small model should not have to invent a perfect unique id before its reasoning is considered);
+`reasoningSummary` is 1–500 characters; a `risk` field is **never** accepted (unknown fields are
+rejected). Placeholder strings are rejected where a field declares `nonPlaceholder`.
 
 ### 3.2 Capability definition (trusted configuration)
 

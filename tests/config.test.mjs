@@ -117,6 +117,14 @@ test('adapter headers come from a separate file and never from the config body',
   );
 });
 
+test('an empty exposure.domains list is a supported configuration (no domain filter, still bounded)', async () => {
+  await withConfig({ exposure: { maxCapabilities: 12, domains: [] } }, (file) => {
+    const loaded = loadConfig(file);
+    assert.deepEqual(loaded.config.exposure.domains, [], 'the domain filter can be deliberately disabled');
+    assert.equal(loaded.config.exposure.maxCapabilities, 12, 'the capability cap still bounds the active surface');
+  });
+});
+
 test('documented defaults are conservative and applied only where a key is absent', async () => {
   assert.equal(CONFIG_DEFAULTS.adapters.http.enabled, false);
   assert.equal(CONFIG_DEFAULTS.provider.allowNonLocalProvider, false);

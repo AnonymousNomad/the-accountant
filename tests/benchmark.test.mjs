@@ -8,8 +8,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { FAILURE_TAXONOMY } from '../benchmarks/run-benchmark.mjs';
 import { STATUS } from '../src/harness.mjs';
 
@@ -30,12 +30,13 @@ function runArm(/** @type {string} */ arm, /** @type {string[]} */ extra = []) {
     timeout: 120000
   });
   assert.equal(run.status, 0, run.stderr || run.stdout);
-  const dir = resolve(process.cwd(), 'benchmarks/results');
-  const runs = readdirSync(dir)
-    .filter((name) => name.endsWith(`-${arm}`))
-    .sort();
-  const latest = join(dir, runs[runs.length - 1], 'report.json');
-  return JSON.parse(readFileSync(latest, 'utf8'));
+  // Read exactly the report this run wrote, from the path the runner itself prints. Scanning the
+  // results directory for the newest name is not isolated: concurrent runs, and non-monotonic clock
+  // names (a backward system-time correction), can hand back a different run's report.
+  const printed = [...run.stdout.matchAll(/^report: (.+)$/gm)];
+  assert.ok(printed.length > 0, `the runner must print its report path; stdout was: ${run.stdout}`);
+  const reportPath = /** @type {string} */ (printed[printed.length - 1][1]).trim();
+  return JSON.parse(readFileSync(reportPath, 'utf8'));
 }
 
 test('the fixture has at least 25 cases and covers every required class', () => {

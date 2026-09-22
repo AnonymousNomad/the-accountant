@@ -1,0 +1,47 @@
+{
+  "identity": {
+    "actorId": "operator-local",
+    "workspaceId": "live-1.2b"
+  },
+  "provider": {
+    "kind": "llama-server",
+    "baseUrl": "http://127.0.0.1:8101",
+    "model": "LFM2.5-1.2B-Instruct-Q8_0.gguf",
+    "executable": "E:\\llama-cpp\\llama-server.exe",
+    "modelPath": "E:\\models\\lfm2.5-1.2b-instruct\\LFM2.5-1.2B-Instruct-Q8_0.gguf",
+    "manageServer": true,
+    "port": 8101,
+    "numCtx": 8192,
+    "threads": 6,
+    "startupTimeoutMs": 180000,
+    "inferenceTimeoutMs": 300000,
+    "maxTokens": 512,
+    "temperature": 0.1,
+    "topK": 50,
+    "repeatPenalty": 1.05,
+    "structuredMode": "json_schema",
+    "allowNonLocalProvider": false
+  },
+  "policy": {
+    "riskAllowlist": ["READ", "DRAFT", "MUTATION", "FINANCIAL"],
+    "requireConfirmationFor": ["FINANCIAL"],
+    "grantedPermissions": ["accounting.read", "accounting.write", "accounting.financial", "payroll.read", "inventory.read", "admin.read"]
+  },
+  "confirmation": { "ttlSeconds": 120 },
+  "authority": { "permitTtlSeconds": 60 },
+  "exposure": {
+    "maxCapabilities": 12,
+    "domains": ["accounting.invoices"]
+  },
+  "adapters": {
+    "mock": { "enabled": true },
+    "http": {
+      "enabled": false,
+      "baseUrl": "",
+      "bindings": {},
+      "headersFile": null,
+      "timeoutMs": 10000
+    }
+  },
+  "evidence": { "dir": "var/evidence-live-1.2b" }
+}

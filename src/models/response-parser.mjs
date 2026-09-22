@@ -13,8 +13,6 @@ import { ProposalError, CODES } from '../core/errors.mjs';
 import { validate } from '../core/schema.mjs';
 import { ENVELOPE_SCHEMA } from './prompt.mjs';
 
-export const PROPOSAL_ID_PATTERN = /^[A-Za-z0-9._:-]{1,64}$/;
-
 /**
  * @typedef {{ kind: 'proposal', proposalId: string, capability: string, arguments: Record<string, unknown>, reasoningSummary: string }
  *   | { kind: 'clarification', question: string, reasoningSummary: string }
@@ -40,11 +38,19 @@ export function parseEnvelope(text) {
   const kind = record.kind;
 
   if (kind === 'proposal') {
-    const allowed = ['kind', 'proposalId', 'capability', 'arguments', 'reasoningSummary'];
+    // The all-fields-required form (what the engine is asked to emit) carries question/reason as
+    // empty strings; the per-kind form simply omits them. Both are accepted here; the semantics
+    // below are identical either way.
+    const allowed = ['kind', 'proposalId', 'capability', 'arguments', 'reasoningSummary', 'question', 'reason'];
     rejectExtraFields(record, allowed);
-    const proposalId = record.proposalId;
-    if (typeof proposalId !== 'string' || !PROPOSAL_ID_PATTERN.test(proposalId)) {
-      throw new ProposalError(CODES.RESPONSE_ENVELOPE_INVALID, 'proposal.proposalId must match [A-Za-z0-9._:-]{1,64}', {
+    const rawId = record.proposalId;
+    // The identifier is optional by contract and normalized by the harness (harness.mjs). A small
+    // model should not have to invent a unique, syntactically perfect id before its reasoning is
+    // even considered, and the JSON-Schema subset this engine can enforce cannot express
+    // "required when kind is proposal" (research R-15). The audit identity that matters is the
+    // canonical proposal hash (evidence: docs/LIVE_MODEL_VALIDATION.md).
+    if (rawId !== undefined && (typeof rawId !== 'string' || rawId.length > 64)) {
+      throw new ProposalError(CODES.RESPONSE_ENVELOPE_INVALID, 'proposal.proposalId must be a string of at most 64 characters when supplied', {
         reason: 'proposalId shape'
       });
     }
@@ -60,7 +66,7 @@ export function parseEnvelope(text) {
     }
     return {
       kind: 'proposal',
-      proposalId,
+      proposalId: typeof rawId === 'string' ? rawId : '',
       capability,
       arguments: /** @type {Record<string, unknown>} */ (args),
       reasoningSummary: String(record.reasoningSummary)
@@ -68,7 +74,7 @@ export function parseEnvelope(text) {
   }
 
   if (kind === 'clarification') {
-    rejectExtraFields(record, ['kind', 'question', 'reasoningSummary']);
+    rejectExtraFields(record, ['kind', 'question', 'reasoningSummary', 'capability', 'arguments', 'reason', 'proposalId']);
     const question = record.question;
     if (typeof question !== 'string' || question.trim().length === 0) {
       throw new ProposalError(CODES.RESPONSE_ENVELOPE_INVALID, 'clarification.question must be a non-empty string', {
@@ -78,7 +84,7 @@ export function parseEnvelope(text) {
     return { kind: 'clarification', question: question.trim(), reasoningSummary: String(record.reasoningSummary) };
   }
 
-  rejectExtraFields(record, ['kind', 'reason', 'reasoningSummary']);
+  rejectExtraFields(record, ['kind', 'reason', 'reasoningSummary', 'capability', 'arguments', 'question', 'proposalId']);
   const reason = record.reason;
   if (typeof reason !== 'string' || reason.trim().length === 0) {
     throw new ProposalError(CODES.RESPONSE_ENVELOPE_INVALID, 'unsupported.reason must be a non-empty string', {

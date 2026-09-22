@@ -58,6 +58,9 @@ if (!compiler) {
 }
 
 process.stdout.write(`typecheck: using ${compiler.source} (${compiler.command})\n`);
+process.stdout.write(
+  'typecheck: scope = src/, tests/, scripts/ and the fixture benchmark. Four experiment tools are excluded in tsconfig.json (three live runners + the simulation data checker): they are validated by execution and by their recorded reports, and their typing is thin by design.\n'
+);
 const result = spawnSync(compiler.command, ['-p', 'tsconfig.json', '--pretty', 'false'], {
   cwd: ROOT,
   stdio: 'inherit',
