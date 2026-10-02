@@ -149,6 +149,13 @@ export function createOllamaProvider(options) {
       }
 
       const toolCalls = Array.isArray(data?.message?.tool_calls) ? data.message.tool_calls : [];
+      if (toolCallMode === 'native' && toolCalls.length > 1) {
+        throw new ProviderError(
+          CODES.PROVIDER_BAD_RESPONSE,
+          `native response contained ${toolCalls.length} tool calls; the harness contract is exactly one ActionProposal per turn`,
+          { toolCalls: toolCalls.length }
+        );
+      }
       let text = content;
       if (toolCallMode === 'native' && toolCalls.length > 0) {
         const envelope = toolCallToEnvelope(toolCalls[0]);
@@ -277,7 +284,10 @@ export function toolCallToEnvelope(call) {
       return null;
     }
   }
-  if (args === null || typeof args !== 'object' || Array.isArray(args)) args = {};
+  // The runtime contract declares `arguments` as an object. Malformed shapes (missing, null, array,
+  // primitive, or a JSON string that does not parse to an object) are REJECTED rather than
+  // normalized into a possibly-valid proposal.
+  if (args === null || typeof args !== 'object' || Array.isArray(args)) return null;
   if (fn.name === 'clarification') {
     const question = typeof args.question === 'string' && args.question.trim().length > 0 ? args.question : 'Could you clarify?';
     return { kind: 'clarification', question, reasoningSummary: 'native tool call' };

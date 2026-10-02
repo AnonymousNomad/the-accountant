@@ -71,6 +71,7 @@ export const CODES = Object.freeze({
  * @typedef {object} ErrorDetail
  * @property {string} [stage]   Pipeline stage that failed.
  * @property {string} [reason]  Human-readable reason.
+ * @property {number} [toolCalls] Observed native tool-call count when the single-action contract is violated.
  * @property {unknown} [value]  Additional structured detail (never secrets).
  */
 

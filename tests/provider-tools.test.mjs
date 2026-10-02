@@ -122,6 +122,42 @@ test('native mode fails closed without tools, and an unmappable call is a typed 
   }
 });
 
+test('multiple native tool calls fail closed — never first-call selection', async () => {
+  const { server, url } = await engine((body, res) => {
+    res.end(JSON.stringify({
+      message: {
+        content: '',
+        tool_calls: [
+          { function: { name: 'customer.search', arguments: { query: 'a' } } },
+          { function: { name: 'customer.create', arguments: { name: 'b' } } }
+        ]
+      },
+      done_reason: 'stop'
+    }));
+  });
+  try {
+    const provider = createOllamaProvider({ baseUrl: url, model: 'm', toolCallMode: 'native' });
+    await assert.rejects(
+      () => provider.complete({ systemPrompt: 's', userMessage: 'u', tools: TOOLS }),
+      (/** @type {any} */ err) => err.code === 'PROVIDER_BAD_RESPONSE' && /2 tool calls/.test(err.message) && err.detail?.toolCalls === 2
+    );
+  } finally {
+    server.close();
+  }
+});
+
+test('malformed native argument shapes are rejected, never normalized', () => {
+  assert.equal(toolCallToEnvelope({ function: { name: 'x' } }), null);
+  assert.equal(toolCallToEnvelope({ function: { name: 'x', arguments: null } }), null);
+  assert.equal(toolCallToEnvelope({ function: { name: 'x', arguments: [] } }), null);
+  assert.equal(toolCallToEnvelope({ function: { name: 'x', arguments: 5 } }), null);
+  assert.equal(toolCallToEnvelope({ function: { name: 'x', arguments: 'not-json' } }), null);
+  assert.equal(toolCallToEnvelope({ function: { name: 'x', arguments: '[]' } }), null);
+  const empty = /** @type {any} */ (toolCallToEnvelope({ function: { name: 'x', arguments: '{}' } }));
+  assert.equal(empty.kind, 'proposal');
+  assert.deepEqual(empty.arguments, {});
+});
+
 test('an invalid toolCallMode is refused at construction', () => {
   assert.throws(
     () => createOllamaProvider({ baseUrl: 'http://127.0.0.1:11434', model: 'm', toolCallMode: 'sometimes' }),
