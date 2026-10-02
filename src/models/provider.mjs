@@ -17,14 +17,15 @@ import { createLlamaServerProvider } from './llama-server-provider.mjs';
  * @typedef {object} ProviderRequest
  * @property {string} systemPrompt
  * @property {string} userMessage
- * @property {Record<string, unknown>} formatSchema
+ * @property {Record<string, unknown>} [formatSchema]  Required by the JSON-envelope protocol; unused by the native tool-call protocol.
+ * @property {Array<Record<string, unknown>>} [tools]  Native tool-call protocol: the callable surface (see models/ollama-provider.mjs, toolsFromDefinitions).
  * @property {number} [timeoutMs]
  */
 
 /**
  * @typedef {object} ProviderResult
  * @property {string} text
- * @property {{ provider: string, model: string, doneReason?: string, evalCount?: number, totalDurationMs?: number, loadDurationMs?: number, loadMs?: number, serverVersion?: string|null, seed?: number, temperature?: number, promptTokens?: number, completionTokens?: number, promptEvalMs?: number, finishReason?: string, contentChars?: number, reasoningChars?: number }} meta
+ * @property {{ provider: string, model: string, doneReason?: string, evalCount?: number, totalDurationMs?: number, loadDurationMs?: number, loadMs?: number, serverVersion?: string|null, seed?: number, temperature?: number, promptTokens?: number, completionTokens?: number, promptEvalMs?: number, finishReason?: string, contentChars?: number, reasoningChars?: number, toolCallMode?: string, promptEvalCount?: number, evalMs?: number, promptEvalTokensPerSecond?: number, evalTokensPerSecond?: number, toolCalls?: number }} meta
  */
 
 /**

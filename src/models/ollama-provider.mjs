@@ -6,8 +6,15 @@
  *  - `stream: false` explicitly (R-04, R-10): v0.1 does not implement NDJSON accumulation.
  *  - `format` carries the envelope schema (R-01); the schema is ALSO restated in the prompt
  *    (R-03) and the output is validated by the harness regardless (R-15).
- *  - `tools` is never sent (R-06, R-07): no `tool_choice` support, multiple calls possible,
- *    no published argument-validity guarantee.
+ *  - Two call protocols, chosen by `toolCallMode`:
+ *      "json"   — the envelope schema travels in `format` (R-01); the model is asked to emit one
+ *                 JSON object. Default; unchanged behaviour.
+ *      "native" — the callable surface travels in `tools` and the runtime maps the model's native
+ *                 tool call back to `message.tool_calls`; the provider converts the FIRST call into
+ *                 the same envelope JSON so the harness keeps ONE parsing/authority path. Required
+ *                 for models that speak native tool calls instead of the envelope instruction
+ *                 (`toolCallMode "native"` without `request.tools` fails closed).
+ *    In both modes the provider returns TEXT; parsing and authority remain the harness's.
  *  - The API is unauthenticated and localhost-bound (R-12), so no credential is ever sent,
  *    and a non-loopback host is refused unless the operator explicitly opted in.
  *  - Typed error mapping for 404/429/5xx and unreachable transports (R-08). No silent retry.
@@ -23,7 +30,7 @@ import { assertLoopback } from '../core/config.mjs';
  */
 
 /**
- * @param {{ baseUrl: string, model: string, timeoutMs?: number, numCtx?: number, keepAlive?: string, seed?: number, temperature?: number, allowNonLocalProvider?: boolean, fetchImpl?: typeof fetch }} options
+ * @param {{ baseUrl: string, model: string, timeoutMs?: number, numCtx?: number, keepAlive?: string, seed?: number, temperature?: number, allowNonLocalProvider?: boolean, toolCallMode?: string, fetchImpl?: typeof fetch }} options
  * @returns {Provider}
  */
 export function createOllamaProvider(options) {
@@ -49,6 +56,13 @@ export function createOllamaProvider(options) {
 
   const endpoint = `${baseUrl.replace(/\/+$/, '')}/api/chat`;
   const doFetch = options.fetchImpl ?? fetch;
+  const toolCallMode = options.toolCallMode ?? 'json';
+  if (toolCallMode !== 'json' && toolCallMode !== 'native') {
+    throw new ProviderError(
+      CODES.PROVIDER_NOT_CONFIGURED,
+      `provider.toolCallMode must be "json" or "native" (got ${JSON.stringify(toolCallMode)}).`
+    );
+  }
 
   return {
     kind: 'ollama',
@@ -60,6 +74,13 @@ export function createOllamaProvider(options) {
      */
     async complete(request) {
       const deadlineMs = request.timeoutMs ?? timeoutMs;
+      const tools = Array.isArray(request.tools) ? request.tools : [];
+      if (toolCallMode === 'native' && tools.length === 0) {
+        throw new ProviderError(
+          CODES.PROVIDER_NOT_CONFIGURED,
+          'toolCallMode "native" requires request.tools: the tools API carries the call contract, and without it the model has no callable surface.'
+        );
+      }
       const body = {
         model,
         messages: [
@@ -67,9 +88,9 @@ export function createOllamaProvider(options) {
           { role: 'user', content: request.userMessage }
         ],
         stream: false,
-        format: request.formatSchema,
         keep_alive: keepAlive,
-        options: { temperature, seed, num_ctx: numCtx }
+        options: { temperature, seed, num_ctx: numCtx },
+        ...(toolCallMode === 'native' ? { tools } : { format: request.formatSchema })
       };
 
       const controller = new AbortController();
@@ -127,15 +148,41 @@ export function createOllamaProvider(options) {
         throw new ProviderError(CODES.PROVIDER_BAD_RESPONSE, 'model runtime response did not contain message.content');
       }
 
+      const toolCalls = Array.isArray(data?.message?.tool_calls) ? data.message.tool_calls : [];
+      let text = content;
+      if (toolCallMode === 'native' && toolCalls.length > 0) {
+        const envelope = toolCallToEnvelope(toolCalls[0]);
+        if (envelope === null) {
+          throw new ProviderError(
+            CODES.PROVIDER_BAD_RESPONSE,
+            'native tool call could not be mapped to a proposal envelope (missing function name or unparseable arguments)'
+          );
+        }
+        text = JSON.stringify(envelope);
+      }
+      const reasoning = data?.message?.reasoning_content ?? data?.message?.thinking;
+      const promptEvalCount = typeof data?.prompt_eval_count === 'number' ? data.prompt_eval_count : undefined;
+      const promptEvalNs = typeof data?.prompt_eval_duration === 'number' ? data.prompt_eval_duration : undefined;
+      const evalCount = typeof data?.eval_count === 'number' ? data.eval_count : undefined;
+      const evalNs = typeof data?.eval_duration === 'number' ? data.eval_duration : undefined;
+
       return {
-        text: content,
+        text,
         meta: {
           provider: 'ollama',
           model,
+          toolCallMode,
           doneReason: typeof data?.done_reason === 'string' ? data.done_reason : undefined,
-          evalCount: typeof data?.eval_count === 'number' ? data.eval_count : undefined,
+          evalCount,
           totalDurationMs: typeof data?.total_duration === 'number' ? Math.round(data.total_duration / 1e6) : undefined,
           loadDurationMs: typeof data?.load_duration === 'number' ? Math.round(data.load_duration / 1e6) : undefined,
+          promptEvalCount,
+          promptEvalMs: promptEvalNs === undefined ? undefined : Math.round(promptEvalNs / 1e6),
+          evalMs: evalNs === undefined ? undefined : Math.round(evalNs / 1e6),
+          promptEvalTokensPerSecond: promptEvalCount !== undefined && promptEvalNs ? roundRate(promptEvalCount, promptEvalNs) : undefined,
+          evalTokensPerSecond: evalCount !== undefined && evalNs ? roundRate(evalCount, evalNs) : undefined,
+          reasoningChars: typeof reasoning === 'string' ? reasoning.length : 0,
+          toolCalls: toolCalls.length,
           serverVersion: null,
           seed,
           temperature
@@ -196,4 +243,69 @@ function extractError(raw) {
     /* fall through to a bounded excerpt */
   }
   return raw.slice(0, 200);
+}
+
+/**
+ * @param {number} count
+ * @param {number} durationNs
+ * @returns {number}
+ */
+function roundRate(count, durationNs) {
+  return Math.round((count / (durationNs / 1e9)) * 100) / 100;
+}
+
+/**
+ * Map ONE native tool call (the runtime's `message.tool_calls[i]`) into the same envelope the
+ * harness already parses for the JSON protocol, so authority, validation, and evidence have one
+ * path regardless of protocol. Models that ask or refuse through pseudo-tools use the reserved
+ * names `clarification` / `unsupported`.
+ *
+ * @param {unknown} call
+ * @returns {{ kind: 'proposal', capability: string, arguments: Record<string, unknown>, reasoningSummary: string }
+ *   | { kind: 'clarification', question: string, reasoningSummary: string }
+ *   | { kind: 'unsupported', reason: string, reasoningSummary: string }
+ *   | null}
+ */
+export function toolCallToEnvelope(call) {
+  const fn = call !== null && typeof call === 'object' ? /** @type {any} */ (call).function : null;
+  if (!fn || typeof fn.name !== 'string' || fn.name.trim().length === 0) return null;
+  let args = fn.arguments;
+  if (typeof args === 'string') {
+    try {
+      args = JSON.parse(args);
+    } catch {
+      return null;
+    }
+  }
+  if (args === null || typeof args !== 'object' || Array.isArray(args)) args = {};
+  if (fn.name === 'clarification') {
+    const question = typeof args.question === 'string' && args.question.trim().length > 0 ? args.question : 'Could you clarify?';
+    return { kind: 'clarification', question, reasoningSummary: 'native tool call' };
+  }
+  if (fn.name === 'unsupported') {
+    const reason = typeof args.reason === 'string' && args.reason.trim().length > 0 ? args.reason : 'Not supported.';
+    return { kind: 'unsupported', reason, reasoningSummary: 'native tool call' };
+  }
+  return { kind: 'proposal', capability: fn.name, arguments: args, reasoningSummary: 'native tool call' };
+}
+
+/**
+ * Build the runtime's `tools` payload from plain definitions ({ name, description, parameters }),
+ * keeping the provider free of any knowledge about capabilities or the domain.
+ *
+ * @param {Array<{ name: string, description?: string, parameters?: Record<string, unknown> }>} definitions
+ * @returns {Array<Record<string, unknown>>}
+ */
+export function toolsFromDefinitions(definitions) {
+  return (Array.isArray(definitions) ? definitions : []).map((definition) => ({
+    type: 'function',
+    function: {
+      name: String(definition.name),
+      description: String(definition.description ?? '').slice(0, 512),
+      parameters:
+        definition.parameters !== null && typeof definition.parameters === 'object'
+          ? definition.parameters
+          : { type: 'object', properties: {} }
+    }
+  }));
 }
