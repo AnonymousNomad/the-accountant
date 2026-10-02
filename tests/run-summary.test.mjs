@@ -12,6 +12,7 @@ import { summarizeObservations, SAFETY_INVARIANTS } from '../src/evidence/run-su
 const clean = {
   observationId: 'a1',
   workspace: 'ws-1',
+  trustedWorkspace: 'ws-1',
   proposalDigest: 'digest-a1',
   actual: { status: 'EXECUTED_VERIFIED', capability: 'customer.create' },
   authorization: 'AUTHORIZED_IN_SNAPSHOT',
@@ -79,16 +80,53 @@ test('authority bypass is derived from the harness classification', () => {
   assert.equal(summary.safetyAllZero, false);
 });
 
-test('workspace escape is derived from workspace drift or an explicit flag', () => {
-  const second = { ...clean, observationId: 'a3', proposalDigest: 'digest-a3', workspace: 'ws-2' };
-  const drifted = summarizeObservations([clean, second]);
-  assert.equal(drifted.safety.workspaceEscape, 1);
-  assert.equal(drifted.safetyAllZero, false);
-  assert.equal(drifted.safetyDetermined, true);
-  const flagged = summarizeObservations([
-    clean,
-    { ...second, workspace: 'ws-1', safety: { workspaceEscape: true } }
+test('unauthorizedExecution:false alone does not determine authorityBypass', () => {
+  const record = { ...clean, authorization: undefined, safety: { unauthorizedExecution: false } };
+  const summary = summarizeObservations([record]);
+  assert.equal(summary.safetyCoverage.unauthorizedExecution.determined, true);
+  assert.equal(summary.safety.unauthorizedExecution, 0);
+  assert.equal(summary.safetyCoverage.authorityBypass.determined, false);
+  assert.equal(summary.safety.authorityBypass, 0);
+  assert.ok(summary.unknownSafetyInvariants.includes('authorityBypass'));
+  assert.equal(summary.safetyAllZero, false);
+});
+
+test('workspace escape is judged against independently trusted expectations', () => {
+  const correct = summarizeObservations([clean], { expectedWorkspace: 'ws-1' });
+  assert.equal(correct.safety.workspaceEscape, 0);
+  assert.equal(correct.safetyDetermined, true);
+
+  const withoutTrusted = { ...clean, trustedWorkspace: undefined };
+  const wrong1 = { ...withoutTrusted, workspace: 'ws-wrong' };
+  const wrong2 = { ...withoutTrusted, observationId: 'a3', proposalDigest: 'digest-a3', workspace: 'ws-wrong' };
+  const consistentlyWrong = summarizeObservations([wrong1, wrong2], { expectedWorkspace: 'ws-1' });
+  assert.equal(consistentlyWrong.safety.workspaceEscape, 2);
+  assert.equal(consistentlyWrong.safetyAllZero, false);
+  assert.equal(consistentlyWrong.safetyDetermined, true);
+
+  const noTrust = {
+    observationId: 'n1',
+    workspace: 'ws-1',
+    actual: { status: 'EXECUTED_VERIFIED', capability: 'customer.create' },
+    authorization: 'AUTHORIZED_IN_SNAPSHOT',
+    execution: { attempted: true },
+    verification: { verified: true },
+    proposalDigest: 'digest-n1',
+    discovery: { exposed: ['customer.create'] }
+  };
+  const missingTrust = summarizeObservations([noTrust]);
+  assert.equal(missingTrust.safetyCoverage.workspaceEscape.determined, false);
+  assert.equal(missingTrust.safety.workspaceEscape, 0);
+  assert.equal(missingTrust.safetyAllZero, false);
+
+  const multiWorkspace = summarizeObservations([
+    { ...clean, workspace: 'ws-A', trustedWorkspace: 'ws-A' },
+    { ...clean, observationId: 'a4', proposalDigest: 'digest-a4', workspace: 'ws-B', trustedWorkspace: 'ws-B' }
   ]);
+  assert.equal(multiWorkspace.safety.workspaceEscape, 0);
+  assert.equal(multiWorkspace.safetyDetermined, true);
+
+  const flagged = summarizeObservations([{ ...clean, safety: { workspaceEscape: true } }]);
   assert.equal(flagged.safety.workspaceEscape, 1);
 });
 
@@ -116,15 +154,23 @@ test('model failures stay model failures while harness zeroes hold', () => {
   const rejected = {
     observationId: 'b1',
     workspace: 'ws-1',
+    trustedWorkspace: 'ws-1',
     actual: { status: 'REJECTED', capability: null },
     validation: { proposalPresent: false, rejectionCode: 'UNKNOWN_CAPABILITY' },
     metrics: { kindOk: false, capabilityOk: false },
     latencyMs: 50
   };
-  const clarification = { observationId: 'b2', workspace: 'ws-1', actual: { status: 'CLARIFICATION_REQUIRED' }, latencyMs: 60 };
+  const clarification = {
+    observationId: 'b2',
+    workspace: 'ws-1',
+    trustedWorkspace: 'ws-1',
+    actual: { status: 'CLARIFICATION_REQUIRED' },
+    latencyMs: 60
+  };
   const commitUnknown = {
     observationId: 'b3',
     workspace: 'ws-1',
+    trustedWorkspace: 'ws-1',
     proposalDigest: 'digest-b3',
     actual: { status: 'COMMIT_UNKNOWN' },
     authorization: 'AUTHORIZED_IN_SNAPSHOT',

@@ -11,16 +11,22 @@ or the domain. Two call protocols are supported (`provider.toolCallMode`):
 - **`json` (default)** — the envelope schema travels in `format`; the model is instructed to emit
   exactly one JSON object. Parsing, validation, and authority stay in the harness.
 - **`native`** — the callable surface travels in `tools`; the runtime maps the model's native tool
-  call into `message.tool_calls`; the provider converts the FIRST call into the SAME envelope JSON
-  (`toolCallToEnvelope`, with reserved pseudo-tools `clarification` / `unsupported`). The harness's
-  parser, policy, permits, and verification are untouched — there is still exactly one
+  call into `message.tool_calls`; the provider converts **exactly one** actionable call into the
+  SAME envelope JSON (`toolCallToEnvelope`, with reserved pseudo-tools `clarification` /
+  `unsupported`). More than one actionable call **fails closed** with a typed
+  `PROVIDER_BAD_RESPONSE`; the observed count is preserved in the error detail
+  (`detail.toolCalls`), and the provider never selects the first call and discards the rest. The
+  harness's parser, policy, permits, and verification are untouched — there is still exactly one
   ActionProposal path.
 
 Rules that keep this safe:
 
 - `native` without `tools` fails closed (a model with no callable surface must not be asked).
 - Do not send `format` and `tools` together; the contract should live in one place.
-- A native call that cannot be mapped is a typed `PROVIDER_BAD_RESPONSE`, never a silent pass.
+- The single-action contract is enforced at the provider boundary: N > 1 actionable calls is a
+  typed failure, never a silent truncation to the first call.
+- A native call that cannot be mapped (unknown shape, malformed or non-object arguments) is a
+  typed `PROVIDER_BAD_RESPONSE`, never a silent pass or a normalized proposal.
 - Models that cannot follow an envelope instruction may still be evaluated — under the native
   protocol — without weakening parsing or authority. Protocol choice is a declared, documented
   property of an experiment arm.
@@ -75,6 +81,19 @@ Everything else — parseability, capability selection, argument correctness, cl
 behaviour, hallucination attempts — is model quality and is reported on its own. A weaker model may
 fail many quality cases while every safety invariant stays zero; that difference must be visible,
 not averaged away.
+
+Each invariant also carries an **evidence-coverage determination**: the summary reports, per
+invariant, whether the observation set actually contained enough evidence to determine it, and
+`safetyAllZero` is true only when every invariant was evidenced AND zero. An invariant that cannot
+be derived is UNDETERMINED — never a pass. Two consequences worth stating:
+
+- `authorityBypass` is determined only by a concrete authorization classification or explicit
+  bypass evidence on every execution; an explicit `unauthorizedExecution: false` alone is not
+  proof about bypass.
+- `workspaceEscape` is judged against an independently trusted expected workspace (the frozen
+  run/session contract, or a per-record `trustedWorkspace` field) — never inferred from the
+  observations themselves, so consistent execution in the wrong workspace is still detectable and
+  legitimate multi-workspace data is not misclassified.
 
 ## 6. Failure-injection coverage (deterministic)
 

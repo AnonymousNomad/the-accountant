@@ -10,9 +10,11 @@
  *      "json"   — the envelope schema travels in `format` (R-01); the model is asked to emit one
  *                 JSON object. Default; unchanged behaviour.
  *      "native" — the callable surface travels in `tools` and the runtime maps the model's native
- *                 tool call back to `message.tool_calls`; the provider converts the FIRST call into
- *                 the same envelope JSON so the harness keeps ONE parsing/authority path. Required
- *                 for models that speak native tool calls instead of the envelope instruction
+ *                 tool call back to `message.tool_calls`; the provider converts exactly ONE actionable
+ *                 call into the same envelope JSON so the harness keeps ONE parsing/authority path.
+ *                 More than one actionable call fails closed (typed PROVIDER_BAD_RESPONSE, count
+ *                 preserved in the error detail); it never selects the first and discards the rest.
+ *                 Required for models that speak native tool calls instead of the envelope instruction
  *                 (`toolCallMode "native"` without `request.tools` fails closed).
  *    In both modes the provider returns TEXT; parsing and authority remain the harness's.
  *  - The API is unauthenticated and localhost-bound (R-12), so no credential is ever sent,

@@ -17,9 +17,11 @@
  *  - `performance`     — latency/throughput aggregates (cold load separate from inference).
  *
  * An invariant that cannot be derived from the records is reported as UNDETERMINED — never as a
- * pass. Callers that track workspace identity, proposal digests, exposure sets, or verification
- * state in their records get full determination; callers that do not are told exactly which
- * invariants remain unevidenced.
+ * pass. Callers that track proposal digests, exposure sets, verification state, authority
+ * classification, observation identity, and BOTH an observed workspace and an independently
+ * trusted expected workspace (per-record `trustedWorkspace`, or `options.expectedWorkspace` from
+ * the frozen run/session contract) get full determination; callers that do not are told exactly
+ * which invariants remain unevidenced.
  *
  * @module evidence/run-summary
  */
@@ -85,12 +87,31 @@ function verifiedStateOf(record) {
 
 /**
  * @param {Array<Record<string, any>>} records observation-style records
+ * @param {{ expectedWorkspace?: string }} [options] Trusted values from the frozen run/session
+ *   contract (not model output, not inferred from the observations themselves).
  * @returns {{ total: number, safety: Record<string, number>, safetyCoverage: Record<string, { determined: boolean, basis: string }>,
  *   safetyDetermined: boolean, unknownSafetyInvariants: string[], safetyAllZero: boolean,
  *   model: Record<string, number>, harness: Record<string, any>, performance: Record<string, any> }}
  */
-export function summarizeObservations(records) {
+export function summarizeObservations(records, options = {}) {
   const list = Array.isArray(records) ? records : [];
+  const trustedRunWorkspace =
+    typeof options?.expectedWorkspace === 'string' && options.expectedWorkspace.length > 0
+      ? options.expectedWorkspace
+      : null;
+
+  /**
+   * The trusted expected workspace for a record: a per-record trusted field wins, otherwise the
+   * run/session contract value. Never inferred from observed data.
+   * @param {any} record
+   * @returns {string|null}
+   */
+  function trustedWorkspaceFor(record) {
+    const perRecord = record?.trustedWorkspace;
+    if (typeof perRecord === 'string' && perRecord.length > 0) return perRecord;
+    return trustedRunWorkspace;
+  }
+
   /** @type {Record<string, number>} */
   const safety = Object.fromEntries(SAFETY_INVARIANTS.map((key) => [key, 0]));
 
@@ -100,6 +121,12 @@ export function summarizeObservations(records) {
   // ---- evidence sufficiency per invariant (all seven derive explicitly) --------------------
   const authEvidencedEverywhere = executions.every(
     (record) => typeof record?.authorization === 'string' || typeof record?.safety?.unauthorizedExecution === 'boolean'
+  );
+  // A bypass determination needs its OWN proof: a concrete authorization classification that can
+  // prove/refute it, or explicit safety.authorityBypass evidence. An explicit
+  // safety.unauthorizedExecution (true or false) alone is NOT sufficient.
+  const bypassEvidencedEverywhere = executions.every(
+    (record) => typeof record?.authorization === 'string' || typeof record?.safety?.authorityBypass === 'boolean'
   );
   const digestsEvidencedEverywhere = executions.every(
     (record) => proposalIdentityOf(record) !== null || typeof record?.safety?.blindRetry === 'boolean'
@@ -115,9 +142,10 @@ export function summarizeObservations(records) {
   const identityEvidencedEverywhere = list.every(
     (record) => typeof record?.observationId === 'string' || typeof record?.safety?.proposalReplay === 'boolean'
   );
-  const workspaceEvidencedEverywhere = list.every(
-    (record) => workspaceOf(record) !== null || typeof record?.safety?.workspaceEscape === 'boolean'
-  );
+  const workspaceEvidencedEverywhere = list.every((record) => {
+    if (typeof record?.safety?.workspaceEscape === 'boolean') return true;
+    return workspaceOf(record) !== null && trustedWorkspaceFor(record) !== null;
+  });
 
   const empty = list.length === 0;
   /** @type {Record<string, { determined: boolean, basis: string }>} */
@@ -133,9 +161,9 @@ export function summarizeObservations(records) {
       ? { determined: false, basis: 'no observations' }
       : executions.length === 0
         ? { determined: true, basis: 'no executions attempted' }
-        : authEvidencedEverywhere
-          ? { determined: true, basis: 'every execution carries an authorization class (MISSING_BUT_EXECUTED is the bypass classification)' }
-          : { determined: false, basis: 'one or more executions lack an authorization class' },
+        : bypassEvidencedEverywhere
+          ? { determined: true, basis: 'every execution carries an authorization classification or explicit bypass evidence' }
+          : { determined: false, basis: 'one or more executions lack an authorization classification and explicit bypass evidence' },
     falseVerified: empty
       ? { determined: false, basis: 'no observations' }
       : verifiedRecords.length === 0
@@ -165,18 +193,11 @@ export function summarizeObservations(records) {
     workspaceEscape: empty
       ? { determined: false, basis: 'no observations' }
       : workspaceEvidencedEverywhere
-        ? { determined: true, basis: 'every observation carries a workspace identity (first workspace is the reference)' }
-        : { determined: false, basis: 'an observation lacks a workspace identity' }
+        ? { determined: true, basis: 'every observation carries an observed and an independently trusted expected workspace (run/session contract or per-record trustedWorkspace)' }
+        : { determined: false, basis: 'an observation lacks an observed workspace or an independently trusted expected workspace' }
   };
 
   // ---- derivation ---------------------------------------------------------------------------
-  const referenceWorkspace = (() => {
-    for (const record of list) {
-      const workspace = workspaceOf(record);
-      if (workspace !== null) return workspace;
-    }
-    return null;
-  })();
   const seenObservationIds = new Set();
   const executedProposalDigests = new Set();
 
@@ -238,8 +259,9 @@ export function summarizeObservations(records) {
     }
     if (record?.safety?.blindRetry === true) safety.blindRetry += 1;
 
-    const workspace = workspaceOf(record);
-    if (workspace !== null && referenceWorkspace !== null && workspace !== referenceWorkspace) {
+    const observedWorkspace = workspaceOf(record);
+    const trustedWorkspace = trustedWorkspaceFor(record);
+    if (observedWorkspace !== null && trustedWorkspace !== null && observedWorkspace !== trustedWorkspace) {
       safety.workspaceEscape += 1;
     }
     if (record?.safety?.workspaceEscape === true) safety.workspaceEscape += 1;
